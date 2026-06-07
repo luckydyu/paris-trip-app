@@ -756,6 +756,8 @@
         let homeTouchStartY = 0;
         let homeIsDragging = false;
         let homeDragDeltaX = 0;
+        let itineraryTouchStartX = 0;
+        let itineraryTouchStartY = 0;
         let db = null;
         let auth = null;
         let appId = 'default-app-id';
@@ -1576,6 +1578,46 @@
             document.getElementById('appBody').scrollTop = 0;
         }
 
+        function setupItinerarySwipe() {
+            const section = document.getElementById('tab-itinerary');
+            const card = document.getElementById('itineraryDetailCard');
+            if (!section || !card) return;
+
+            section.addEventListener('touchstart', event => {
+                if (event.target.closest('button, input, textarea, select, a')) return;
+                const touch = event.changedTouches[0];
+                itineraryTouchStartX = touch.clientX;
+                itineraryTouchStartY = touch.clientY;
+            }, { passive: true });
+
+            section.addEventListener('touchend', event => {
+                if (event.target.closest('button, input, textarea, select, a')) return;
+                const touch = event.changedTouches[0];
+                const diffX = touch.clientX - itineraryTouchStartX;
+                const diffY = touch.clientY - itineraryTouchStartY;
+                if (Math.abs(diffX) < 70 || Math.abs(diffX) < Math.abs(diffY)) return;
+
+                const nextDay = Math.min(8, Math.max(1, activeDayNum + (diffX > 0 ? 1 : -1)));
+                if (nextDay === activeDayNum) return;
+
+                card.style.transition = 'transform 160ms ease, opacity 160ms ease';
+                card.style.transform = `translateX(${diffX > 0 ? 24 : -24}px)`;
+                card.style.opacity = '0.65';
+
+                setTimeout(() => {
+                    showDay(nextDay);
+                    card.style.transition = 'none';
+                    card.style.transform = `translateX(${diffX > 0 ? -18 : 18}px)`;
+                    card.style.opacity = '0.65';
+                    requestAnimationFrame(() => {
+                        card.style.transition = 'transform 180ms ease, opacity 180ms ease';
+                        card.style.transform = 'translateX(0)';
+                        card.style.opacity = '1';
+                    });
+                }, 150);
+            }, { passive: true });
+        }
+
         function normalizeTimeString(hours, minutes = 0) {
             const normalizedHours = ((Number(hours) % 24) + 24) % 24;
             const normalizedMinutes = ((Number(minutes) % 60) + 60) % 60;
@@ -1673,11 +1715,15 @@
             if (data.details && data.details.length > 0) {
                 data.details.forEach((detail, idx) => {
                     const isFlightDetail = /OZ\s?501/i.test(detail);
+                    const parsed = parseEventParts(detail);
+                    const displayTime = parsed.time || '--:--';
+                    const displayBody = parsed.body || detail;
                     detailsHtml += `
                         <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-slate-200 transition ${isFlightDetail ? 'cursor-pointer' : ''}" ${isFlightDetail ? `onclick="openModal('flightInfoModal')"` : ''}>
-                            <div class="flex items-start space-x-2.5 flex-1 pr-2">
+                            <div class="flex items-start space-x-2.5 flex-1 pr-2 min-w-0">
+                                <div class="w-12 shrink-0 text-[11px] font-extrabold text-parisGold tabular-nums leading-relaxed">${displayTime}</div>
                                 <span class="w-1.5 h-1.5 rounded-full ${isFlightDetail ? 'bg-emerald-500' : 'bg-parisGold'} mt-1.5 shrink-0"></span>
-                                <p class="text-xs text-slate-700 font-medium leading-relaxed">${detail}</p>
+                                <p class="text-xs text-slate-700 font-medium leading-relaxed min-w-0">${displayBody}</p>
                                 ${isFlightDetail ? '<i class="fa-solid fa-plane text-[10px] text-emerald-500 mt-0.5"></i>' : ''}
                             </div>
                             <div class="flex items-center space-x-1 shrink-0">
@@ -1935,6 +1981,7 @@
         setInterval(updateTripClockInfo, 60000);
         renderHomeDayCard();
         setupHomeDaySwipe();
+        setupItinerarySwipe();
         showDay(activeDayNum);
         fetchRealTimeData();
         updateCurrentLocation();
