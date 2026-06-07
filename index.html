@@ -734,9 +734,8 @@
 
     <!-- Firebase 및 서비스 로직 연동 (PWA Offline-First 하이브리드 지원) -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        let initializeApp, getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged;
+        let getFirestore, doc, setDoc, getDoc, onSnapshot;
 
         // 상태 변수 정의
         let currentTab = 'home';
@@ -857,6 +856,18 @@
 
         // 1. Firebase 통합 연동 (규칙 1, 2, 3 완벽 준수)
         async function setupFirebaseSync() {
+            if (!initializeApp) {
+                const [appModule, authModule, firestoreModule] = await Promise.all([
+                    import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"),
+                    import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"),
+                    import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js")
+                ]);
+
+                ({ initializeApp } = appModule);
+                ({ getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } = authModule);
+                ({ getFirestore, doc, setDoc, getDoc, onSnapshot } = firestoreModule);
+            }
+
             // [배포 안내] 깃허브 배포 시 본인의 실제 Firebase Config 설정을 아래에 대치하시면 정상 구동됩니다.
             const myFirebaseConfig = {
                 apiKey: "AIzaSyB7HYXZ3GmMgnSfC8NDYcfFsv4GS8iAZ1o",
@@ -1632,6 +1643,12 @@
         window.joinGroup = joinGroup;
         window.disconnectGroup = disconnectGroup;
         window.copyGroupCode = copyGroupCode;
+
+        initItinerary();
+        populateSwapSelectors();
+        showDay(activeDayNum);
+        fetchRealTimeData();
+        setupFirebaseSync().catch(err => console.warn('Firebase sync unavailable:', err));
     </script>
 </body>
 </html>
