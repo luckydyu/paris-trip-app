@@ -107,13 +107,13 @@
             
             <!-- 항공편 안내 보드 -->
             <div class="mt-3 bg-slate-800/60 rounded-lg p-2.5 flex justify-between items-center text-xs text-slate-300">
-                <div class="flex items-center space-x-2">
+                <button onclick="openModal('flightInfoModal')" class="flex items-center space-x-2 text-left hover:bg-white/5 rounded-lg px-1 py-1 transition" aria-label="OZ501 항공편 정보 열기">
                     <i class="fa-solid fa-plane-departure text-parisGold"></i>
                     <div>
                         <p class="font-semibold text-white">OZ 501 (인천 -> 파리)</p>
-                        <p>6/27 10:05 출발</p>
+                        <p>6/27 10:05 출발 · 눌러서 항공 정보</p>
                     </div>
-                </div>
+                </button>
                 <div class="text-right">
                     <p class="font-semibold text-white">D-Day</p>
                     <p class="text-parisGold">여름 바캉스 시즌</p>
@@ -126,35 +126,9 @@
             
             <!-- ================= TAB 1: 대시보드 (홈) ================= -->
             <section id="tab-home" class="space-y-4">
-                <!-- 오늘 추천 카드 -->
-                <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
-                    <div class="absolute -right-6 -bottom-6 text-slate-700/20 text-9xl font-bold">01</div>
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <span class="text-parisGold font-semibold text-sm">6월 27일 (토요일) - DAY 1</span>
-                            <h2 class="text-2xl font-bold mt-1">"로맨틱 파리의 시작"</h2>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-sm bg-white/10 px-2 py-1 rounded text-slate-200">일몰 22:00</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4 border-t border-slate-700/60 pt-4 space-y-3">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-2 h-2 rounded-full bg-parisGold animate-ping"></div>
-                            <p class="text-sm text-slate-200 font-medium">17:20 CDG 터미널 1 도착 예정</p>
-                        </div>
-                        <p class="text-xs text-slate-400">입국 심사 후, 정액제 안심 공항 택시(우안 65유로)로 숙소 이동을 시작하세요.</p>
-                    </div>
-
-                    <div class="mt-4 flex space-x-2">
-                        <button onclick="switchTab('itinerary')" class="flex-1 bg-parisGold hover:bg-amber-500 text-slate-950 py-2 rounded-lg font-bold text-xs transition">
-                            오늘 동선 상세보기 <i class="fa-solid fa-arrow-right ml-1"></i>
-                        </button>
-                        <button onclick="openModal('emergencyModal')" class="bg-parisRed text-white px-3 py-2 rounded-lg font-bold text-xs flex items-center justify-center">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> SOS
-                        </button>
-                    </div>
+                <!-- 일차별 스와이프 추천 카드 -->
+                <div id="homeDayCard" class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden touch-pan-y select-none">
+                    <!-- JS 연동 바인딩 -->
                 </div>
 
                 <!-- GPS 역지오코딩 기반 내 주소 텍스트 정보 위젯 -->
@@ -623,6 +597,34 @@
             </div>
         </div>
 
+        <!-- OZ501 항공편 바로가기 모달 -->
+        <div id="flightInfoModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+                <div class="bg-parisBlue text-white p-4 flex justify-between items-center">
+                    <h3 class="font-bold text-sm">OZ501 항공편 허브</h3>
+                    <button onclick="closeModal('flightInfoModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div class="p-5 space-y-3 text-xs text-slate-600">
+                    <p class="font-semibold text-slate-900 text-sm">6/27 10:05 ICN → 17:20 CDG</p>
+                    <p>항공권 원본은 가족 예약 메일/여행사 앱에 보관하고, 이 앱에서는 실시간 운항 확인과 공식 체크인 동선으로 빠르게 연결하는 구성이 가장 안전합니다.</p>
+                    <div class="grid gap-2">
+                        <a href="https://flyasiana.com/" target="_blank" rel="noopener" class="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 font-bold text-slate-800">
+                            아시아나 공식 사이트 <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-parisGold"></i>
+                        </a>
+                        <a href="https://www.flightstats.com/v2/flight-tracker/OZ/501" target="_blank" rel="noopener" class="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 font-bold text-slate-800">
+                            OZ501 실시간 운항 추적 <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-parisGold"></i>
+                        </a>
+                        <a href="https://www.flight.info/OZ501" target="_blank" rel="noopener" class="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 font-bold text-slate-800">
+                            OZ501 기본 스케줄 <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-parisGold"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-50 border-t border-slate-100 text-right">
+                    <button onclick="closeModal('flightInfoModal')" class="bg-parisBlue text-white px-4 py-2 rounded-lg font-bold text-xs">닫기</button>
+                </div>
+            </div>
+        </div>
+
         <!-- 긴급 대피 긴급 SOS 모달 가이드 -->
         <div id="emergencyModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border-2 border-parisRed">
@@ -698,8 +700,19 @@
                 <div class="p-5 space-y-4 text-xs">
                     <input type="hidden" id="editEventIndex">
                     <div>
+                        <label class="block text-slate-500 font-bold mb-1">일정 시간</label>
+                        <div class="flex space-x-2">
+                            <input type="time" id="eventTimeInput" class="w-28 p-3 rounded-lg border border-slate-200 text-xs font-bold focus:outline-none focus:ring-1 focus:ring-parisGold">
+                            <div class="flex flex-1 space-x-1">
+                                <button onclick="shiftEventTime(-30)" class="flex-1 bg-slate-100 text-slate-600 rounded-lg font-bold text-[10px]">-30분</button>
+                                <button onclick="shiftEventTime(30)" class="flex-1 bg-slate-100 text-slate-600 rounded-lg font-bold text-[10px]">+30분</button>
+                                <button onclick="shiftEventTime(60)" class="flex-1 bg-slate-100 text-slate-600 rounded-lg font-bold text-[10px]">+1시간</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
                         <label class="block text-slate-500 font-bold mb-1">일정 내용 (한글 또는 영문)</label>
-                        <input type="text" id="eventInputText" placeholder="예: 14:00 에펠탑 근처 레스토랑 예약" class="w-full p-3 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-parisGold">
+                        <input type="text" id="eventInputText" placeholder="예: 에펠탑 근처 레스토랑 예약" class="w-full p-3 rounded-lg border border-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-parisGold">
                     </div>
                 </div>
                 <div class="p-3 bg-slate-50 border-t border-slate-100 flex space-x-2">
@@ -744,6 +757,9 @@
         let isOffline = false;
         let rate = 1796.0; // 외부 통신 장애시 활용할 여행용 기저 환율
         let activeDayNum = 1;
+        let homeActiveDayNum = 1;
+        let homeTouchStartX = 0;
+        let homeTouchStartY = 0;
         let db = null;
         let auth = null;
         let appId = 'default-app-id';
@@ -1287,6 +1303,93 @@
             }, 3000);
         }
 
+        const homeDayCards = {
+            1: { date: "6월 27일 (토요일)", headline: "로맨틱 파리의 시작", badge: "일몰 22:00", focus: "17:20 CDG 터미널 1 도착 예정", note: "입국 심사 후, 정액제 안심 공항 택시(우안 65유로)로 숙소 이동을 시작하세요." },
+            2: { date: "6월 28일 (일요일)", headline: "몽마르뜨와 에펠탑 피크닉", badge: "산책일", focus: "사크레쾨르 성당과 테르트르 광장", note: "오후에는 마르스 광장에서 가족 피크닉과 에펠탑 야경을 느긋하게 잡아두세요." },
+            3: { date: "6월 29일 (월요일)", headline: "모네와 고흐의 교외 나들이", badge: "차량 투어", focus: "08:00 교외 가이드 차량 투어", note: "지베르니와 오베르 쉬르 우아즈는 이동 시간이 길어 간식과 물을 넉넉히 챙기면 좋습니다." },
+            4: { date: "6월 30일 (화요일)", headline: "마레 쇼핑과 튈르리 휴식", badge: "Soldes", focus: "여름 정기 세일 쇼핑", note: "쇼핑 동선 뒤에는 튈르리 정원에서 쉬는 시간을 충분히 남겨두세요." },
+            5: { date: "7월 1일 (수요일)", headline: "루브르 핵심 작품 투어", badge: "예약 필수", focus: "13:30 루브르 공인 가이드 미팅", note: "박물관 내부는 체력 소모가 커서 핵심 작품 위주로 압축해서 보는 날입니다." },
+            6: { date: "7월 2일 (목요일)", headline: "오르세와 판테온", badge: "뮤지엄패스", focus: "13:00 오르세 미술관 입장", note: "시계탑 포토존과 판테온 푸코의 진자를 함께 묶어 예술과 과학의 하루로 잡았습니다." },
+            7: { date: "7월 3일 (금요일)", headline: "베르사유와 개선문", badge: "궁전일", focus: "09:00 베르사유 궁전 입장", note: "정원 이동이 많아 편한 신발과 햇빛 대비가 중요합니다." },
+            8: { date: "7월 4일 (토요일)", headline: "과학관과 귀국 준비", badge: "출국일", focus: "15:30 CDG 공항 출발", note: "텍스리펀드와 수하물 체크 시간을 넉넉히 잡고 공항으로 이동하세요." }
+        };
+
+        function renderHomeDayCard() {
+            const card = document.getElementById('homeDayCard');
+            if (!card) return;
+
+            const data = homeDayCards[homeActiveDayNum];
+            const dayNumber = String(homeActiveDayNum).padStart(2, '0');
+            const indicators = Object.keys(homeDayCards).map(day => {
+                const isActive = Number(day) === homeActiveDayNum;
+                return `<button onclick="goHomeDay(${day})" class="h-1.5 rounded-full transition-all ${isActive ? 'w-5 bg-parisGold' : 'w-1.5 bg-white/30'}" aria-label="${day}일차 보기"></button>`;
+            }).join('');
+
+            card.innerHTML = `
+                <div class="absolute -right-6 -bottom-6 text-slate-700/20 text-9xl font-bold">${dayNumber}</div>
+                <div class="flex justify-between items-start gap-3">
+                    <div>
+                        <span class="text-parisGold font-semibold text-sm">${data.date} - DAY ${homeActiveDayNum}</span>
+                        <h2 class="text-2xl font-bold mt-1">"${data.headline}"</h2>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-sm bg-white/10 px-2 py-1 rounded text-slate-200">${data.badge}</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4 border-t border-slate-700/60 pt-4 space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-2 h-2 rounded-full bg-parisGold animate-ping"></div>
+                        <p class="text-sm text-slate-200 font-medium">${data.focus}</p>
+                    </div>
+                    <p class="text-xs text-slate-400">${data.note}</p>
+                </div>
+
+                <div class="mt-4 flex space-x-2">
+                    <button onclick="openHomeDayDetail()" class="flex-1 bg-parisGold hover:bg-amber-500 text-slate-950 py-2 rounded-lg font-bold text-xs transition">
+                        DAY ${homeActiveDayNum} 동선 상세보기 <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                    <button onclick="openModal('emergencyModal')" class="bg-parisRed text-white px-3 py-2 rounded-lg font-bold text-xs flex items-center justify-center">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> SOS
+                    </button>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <button onclick="goHomeDay(${Math.max(1, homeActiveDayNum - 1)})" class="w-8 h-8 rounded-full bg-white/10 text-white/80 disabled:opacity-30" ${homeActiveDayNum === 1 ? 'disabled' : ''} aria-label="이전 날"><i class="fa-solid fa-chevron-left text-[10px]"></i></button>
+                    <div class="flex items-center space-x-1.5">${indicators}</div>
+                    <button onclick="goHomeDay(${Math.min(8, homeActiveDayNum + 1)})" class="w-8 h-8 rounded-full bg-white/10 text-white/80 disabled:opacity-30" ${homeActiveDayNum === 8 ? 'disabled' : ''} aria-label="다음 날"><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                </div>
+            `;
+        }
+
+        function goHomeDay(dayNum) {
+            homeActiveDayNum = Math.min(8, Math.max(1, Number(dayNum)));
+            renderHomeDayCard();
+        }
+
+        function openHomeDayDetail() {
+            showDay(homeActiveDayNum);
+            switchTab('itinerary');
+        }
+
+        function setupHomeDaySwipe() {
+            const card = document.getElementById('homeDayCard');
+            if (!card) return;
+
+            card.addEventListener('touchstart', event => {
+                const touch = event.changedTouches[0];
+                homeTouchStartX = touch.clientX;
+                homeTouchStartY = touch.clientY;
+            }, { passive: true });
+
+            card.addEventListener('touchend', event => {
+                const touch = event.changedTouches[0];
+                const diffX = touch.clientX - homeTouchStartX;
+                const diffY = touch.clientY - homeTouchStartY;
+                if (Math.abs(diffX) < 50 || Math.abs(diffX) < Math.abs(diffY)) return;
+                goHomeDay(homeActiveDayNum + (diffX > 0 ? 1 : -1));
+            }, { passive: true });
+        }
+
         // 실시간 날씨 및 환율 오픈 API 연동부
         async function fetchRealTimeData() {
             if (isOffline) return;
@@ -1399,11 +1502,86 @@
             document.getElementById('appBody').scrollTop = 0;
         }
 
+        function normalizeTimeString(hours, minutes = 0) {
+            const normalizedHours = ((Number(hours) % 24) + 24) % 24;
+            const normalizedMinutes = ((Number(minutes) % 60) + 60) % 60;
+            return `${String(normalizedHours).padStart(2, '0')}:${String(normalizedMinutes).padStart(2, '0')}`;
+        }
+
+        function timeToMinutes(timeText) {
+            const match = String(timeText || '').match(/^(\d{2}):(\d{2})$/);
+            if (!match) return null;
+            return Number(match[1]) * 60 + Number(match[2]);
+        }
+
+        function parseEventParts(text) {
+            const rawText = String(text || '').trim();
+            const numericMatch = rawText.match(/^(\d{1,2}):(\d{2})\s*(.*)$/);
+            if (numericMatch) {
+                const time = normalizeTimeString(numericMatch[1], numericMatch[2]);
+                return { time, minutes: timeToMinutes(time), body: numericMatch[3].trim() };
+            }
+
+            const koreanTimeMatch = rawText.match(/^(오전|오후)\s*(\d{1,2})시(?:\s*(\d{1,2})분?)?\s*(.*)$/);
+            if (koreanTimeMatch) {
+                let hour = Number(koreanTimeMatch[2]);
+                const minute = Number(koreanTimeMatch[3] || 0);
+                if (koreanTimeMatch[1] === '오후' && hour < 12) hour += 12;
+                if (koreanTimeMatch[1] === '오전' && hour === 12) hour = 0;
+                const time = normalizeTimeString(hour, minute);
+                return { time, minutes: timeToMinutes(time), body: koreanTimeMatch[4].trim() };
+            }
+
+            const periodMatch = rawText.match(/^(오전|점심|오후|저녁|밤):?\s*(.*)$/);
+            if (periodMatch) {
+                const periodTimes = { 오전: '09:00', 점심: '12:00', 오후: '14:00', 저녁: '18:00', 밤: '20:00' };
+                const time = periodTimes[periodMatch[1]];
+                return { time, minutes: timeToMinutes(time), body: periodMatch[2].trim() };
+            }
+
+            return { time: '', minutes: null, body: rawText };
+        }
+
+        function formatEventText(time, body) {
+            return `${time} ${body}`.trim();
+        }
+
+        function sortDayDetailsByTime(dayNum) {
+            const day = itineraryData[dayNum];
+            if (!day || !Array.isArray(day.details)) return;
+            day.details = day.details
+                .map((detail, originalIndex) => {
+                    const parsed = parseEventParts(detail);
+                    return { detail, originalIndex, minutes: parsed.minutes ?? 99999 };
+                })
+                .sort((a, b) => (a.minutes - b.minutes) || (a.originalIndex - b.originalIndex))
+                .map(item => item.detail);
+        }
+
+        function getDefaultEventTime() {
+            const details = itineraryData[activeDayNum]?.details || [];
+            const timedItems = details
+                .map(detail => parseEventParts(detail).minutes)
+                .filter(minutes => Number.isFinite(minutes));
+
+            if (!timedItems.length) return '09:00';
+            const nextMinutes = Math.min(23 * 60 + 59, Math.max(...timedItems) + 60);
+            return normalizeTimeString(Math.floor(nextMinutes / 60), nextMinutes % 60);
+        }
+
+        function shiftEventTime(deltaMinutes) {
+            const input = document.getElementById('eventTimeInput');
+            const currentMinutes = timeToMinutes(input.value) ?? timeToMinutes(getDefaultEventTime());
+            const shiftedMinutes = Math.min(23 * 60 + 59, Math.max(0, currentMinutes + deltaMinutes));
+            input.value = normalizeTimeString(Math.floor(shiftedMinutes / 60), shiftedMinutes % 60);
+        }
+
         // 일간 상세 스케줄 동적 주입 및 수정 패널 활성화
         function showDay(dayNum) {
             activeDayNum = dayNum;
             const data = itineraryData[dayNum];
             if (!data) return;
+            sortDayDetailsByTime(dayNum);
             
             const dayButtons = document.querySelectorAll('.day-btn');
             dayButtons.forEach(btn => {
@@ -1420,17 +1598,17 @@
             let detailsHtml = '';
             if (data.details && data.details.length > 0) {
                 data.details.forEach((detail, idx) => {
+                    const isFlightDetail = /OZ\s?501/i.test(detail);
                     detailsHtml += `
-                        <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-slate-200 transition">
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-slate-200 transition ${isFlightDetail ? 'cursor-pointer' : ''}" ${isFlightDetail ? `onclick="openModal('flightInfoModal')"` : ''}>
                             <div class="flex items-start space-x-2.5 flex-1 pr-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-parisGold mt-1.5 shrink-0"></span>
+                                <span class="w-1.5 h-1.5 rounded-full ${isFlightDetail ? 'bg-emerald-500' : 'bg-parisGold'} mt-1.5 shrink-0"></span>
                                 <p class="text-xs text-slate-700 font-medium leading-relaxed">${detail}</p>
+                                ${isFlightDetail ? '<i class="fa-solid fa-plane text-[10px] text-emerald-500 mt-0.5"></i>' : ''}
                             </div>
                             <div class="flex items-center space-x-1 shrink-0">
-                                <button onclick="moveEvent(${idx}, -1)" title="위로" class="p-1 text-slate-400 hover:text-slate-600 transition text-[11px]"><i class="fa-solid fa-arrow-up"></i></button>
-                                <button onclick="moveEvent(${idx}, 1)" title="아래로" class="p-1 text-slate-400 hover:text-slate-600 transition text-[11px]"><i class="fa-solid fa-arrow-down"></i></button>
-                                <button onclick="openEditEventModal(${idx})" title="수정" class="p-1 text-indigo-500 hover:text-indigo-700 transition text-[11px]"><i class="fa-solid fa-pen"></i></button>
-                                <button onclick="deleteEvent(${idx})" title="삭제" class="p-1 text-red-500 hover:text-red-700 transition text-[11px]"><i class="fa-solid fa-trash-can"></i></button>
+                                <button onclick="event.stopPropagation(); openEditEventModal(${idx})" title="수정" class="p-1 text-indigo-500 hover:text-indigo-700 transition text-[11px]"><i class="fa-solid fa-pen"></i></button>
+                                <button onclick="event.stopPropagation(); deleteEvent(${idx})" title="삭제" class="p-1 text-red-500 hover:text-red-700 transition text-[11px]"><i class="fa-solid fa-trash-can"></i></button>
                             </div>
                         </div>
                     `;
@@ -1482,6 +1660,7 @@
         function openAddEventModal() {
             document.getElementById('eventModalHeaderTitle').innerText = `${activeDayNum}일차 일정 추가`;
             document.getElementById('editEventIndex').value = "-1";
+            document.getElementById('eventTimeInput').value = getDefaultEventTime();
             document.getElementById('eventInputText').value = "";
             openModal('addEditEventModal');
         }
@@ -1489,9 +1668,11 @@
         // 일정 편집 팝업 열기
         function openEditEventModal(idx) {
             const text = itineraryData[activeDayNum].details[idx];
+            const parsed = parseEventParts(text);
             document.getElementById('eventModalHeaderTitle').innerText = `${activeDayNum}일차 일정 수정`;
             document.getElementById('editEventIndex').value = idx;
-            document.getElementById('eventInputText').value = text;
+            document.getElementById('eventTimeInput').value = parsed.time || getDefaultEventTime();
+            document.getElementById('eventInputText').value = parsed.body || text;
             openModal('addEditEventModal');
         }
 
@@ -1514,24 +1695,29 @@
         // 모달 입력 내용 확정 보존
         function saveEventAction() {
             const idx = parseInt(document.getElementById('editEventIndex').value);
+            const time = document.getElementById('eventTimeInput').value;
             const text = document.getElementById('eventInputText').value.trim();
 
-            if (!text) {
-                showToast("내용을 올바르게 채워주세요.");
+            if (!time || !text) {
+                showToast("시간과 내용을 모두 채워주세요.");
                 return;
             }
+
+            const parsedText = parseEventParts(text);
+            const normalizedText = formatEventText(time, parsedText.body || text);
 
             if (idx === -1) {
                 if (!itineraryData[activeDayNum].details) {
                     itineraryData[activeDayNum].details = [];
                 }
-                itineraryData[activeDayNum].details.push(text);
+                itineraryData[activeDayNum].details.push(normalizedText);
                 showToast("새 일정이 추가 및 백업되었습니다!");
             } else {
-                itineraryData[activeDayNum].details[idx] = text;
+                itineraryData[activeDayNum].details[idx] = normalizedText;
                 showToast("일정이 성공적으로 수정되었습니다!");
             }
 
+            sortDayDetailsByTime(activeDayNum);
             saveItinerary();
             showDay(activeDayNum);
             closeModal('addEditEventModal');
@@ -1667,6 +1853,9 @@
         window.deleteEvent = deleteEvent;
         window.saveEventAction = saveEventAction;
         window.updateCurrentLocation = updateCurrentLocation;
+        window.goHomeDay = goHomeDay;
+        window.openHomeDayDetail = openHomeDayDetail;
+        window.shiftEventTime = shiftEventTime;
         
         // 동기화 제어 핸들러 전역 바인딩
         window.createGroup = createGroup;
@@ -1676,6 +1865,8 @@
 
         initItinerary();
         populateSwapSelectors();
+        renderHomeDayCard();
+        setupHomeDaySwipe();
         showDay(activeDayNum);
         fetchRealTimeData();
         updateCurrentLocation();
