@@ -78,7 +78,10 @@
                         <button onclick="switchTab('home')" class="text-lg font-bold tracking-tight text-white hover:text-white focus:text-white active:text-white transition-colors text-left" aria-label="첫 화면으로 이동">
                             Paris-Family 🗼
                         </button>
-                        <span class="bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded font-medium border border-slate-700/50">시차 -7시간</span>
+                        <div class="flex items-center space-x-1">
+                            <span class="bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded font-medium border border-slate-700/50">파리 <span id="parisTimeText">--:--</span></span>
+                            <span class="bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded font-medium border border-slate-700/50">서울 <span id="seoulTimeText">--:--</span></span>
+                        </div>
                     </div>
                     <p class="text-[10px] text-slate-400 mt-0.5 font-medium">파리 여름 바캉스 가이드</p>
                 </div>
@@ -115,8 +118,8 @@
                     </div>
                 </button>
                 <div class="text-right">
-                    <p class="font-semibold text-white">D-Day</p>
-                    <p class="text-parisGold">여름 바캉스 시즌</p>
+                    <p id="departureCountdownText" class="font-semibold text-white">출발 D--</p>
+                    <p id="checkinWindowText" class="text-parisGold">체크인 6/25 10:05</p>
                 </div>
             </div>
         </header>
@@ -751,6 +754,8 @@
         let homeActiveDayNum = 1;
         let homeTouchStartX = 0;
         let homeTouchStartY = 0;
+        let homeIsDragging = false;
+        let homeDragDeltaX = 0;
         let db = null;
         let auth = null;
         let appId = 'default-app-id';
@@ -1294,8 +1299,24 @@
             }, 3000);
         }
 
+        function updateTripClockInfo() {
+            const now = new Date();
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+            const parisTime = new Intl.DateTimeFormat('ko-KR', { ...timeOptions, timeZone: 'Europe/Paris' }).format(now);
+            const seoulTime = new Intl.DateTimeFormat('ko-KR', { ...timeOptions, timeZone: 'Asia/Seoul' }).format(now);
+
+            document.getElementById('parisTimeText').innerText = parisTime;
+            document.getElementById('seoulTimeText').innerText = seoulTime;
+
+            const departure = new Date('2026-06-27T10:05:00+09:00');
+            const checkinOpen = new Date(departure.getTime() - (48 * 60 * 60 * 1000));
+            const daysLeft = Math.ceil((departure - now) / (24 * 60 * 60 * 1000));
+            document.getElementById('departureCountdownText').innerText = daysLeft > 0 ? `출발 D-${daysLeft}` : '출발일';
+            document.getElementById('checkinWindowText').innerText = now >= checkinOpen ? '온라인 체크인 가능' : '체크인 6/25 10:05';
+        }
+
         const homeDayCards = {
-            1: { date: "6월 27일 (토요일)", headline: "로맨틱 파리의 시작", badge: "일몰 22:00", focus: "17:20 CDG 터미널 1 도착 예정", note: "입국 심사 후, 정액제 안심 공항 택시(우안 65유로)로 숙소 이동을 시작하세요." },
+            1: { date: "6월 27일 (토요일)", headline: "로맨틱 파리의 시작", badge: "일몰 21:59", isSunset: true, focus: "17:20 CDG 터미널 1 도착 예정", note: "입국 심사 후, 정액제 안심 공항 택시(우안 65유로)로 숙소 이동을 시작하세요." },
             2: { date: "6월 28일 (일요일)", headline: "몽마르뜨와 에펠탑 피크닉", badge: "산책일", focus: "사크레쾨르 성당과 테르트르 광장", note: "오후에는 마르스 광장에서 가족 피크닉과 에펠탑 야경을 느긋하게 잡아두세요." },
             3: { date: "6월 29일 (월요일)", headline: "모네와 고흐의 교외 나들이", badge: "차량 투어", focus: "08:00 교외 가이드 차량 투어", note: "지베르니와 오베르 쉬르 우아즈는 이동 시간이 길어 간식과 물을 넉넉히 챙기면 좋습니다." },
             4: { date: "6월 30일 (화요일)", headline: "마레 쇼핑과 튈르리 휴식", badge: "Soldes", focus: "여름 정기 세일 쇼핑", note: "쇼핑 동선 뒤에는 튈르리 정원에서 쉬는 시간을 충분히 남겨두세요." },
@@ -1311,6 +1332,9 @@
 
             const data = homeDayCards[homeActiveDayNum];
             const dayNumber = String(homeActiveDayNum).padStart(2, '0');
+            const badgeHtml = data.isSunset
+                ? `<button onclick="openSunsetSource(event)" class="text-sm bg-white/10 px-2 py-1 rounded text-slate-200 hover:bg-white/20 transition" aria-label="일몰 시간 출처 열기">${data.badge}</button>`
+                : `<span class="text-sm bg-white/10 px-2 py-1 rounded text-slate-200">${data.badge}</span>`;
             const indicators = Object.keys(homeDayCards).map(day => {
                 const isActive = Number(day) === homeActiveDayNum;
                 return `<button onclick="goHomeDay(${day})" class="h-1.5 rounded-full transition-all ${isActive ? 'w-5 bg-parisGold' : 'w-1.5 bg-white/30'}" aria-label="${day}일차 보기"></button>`;
@@ -1324,7 +1348,7 @@
                         <h2 class="text-2xl font-bold mt-1">"${data.headline}"</h2>
                     </div>
                     <div class="text-right shrink-0">
-                        <span class="text-sm bg-white/10 px-2 py-1 rounded text-slate-200">${data.badge}</span>
+                        ${badgeHtml}
                     </div>
                 </div>
                 
@@ -1357,6 +1381,46 @@
             renderHomeDayCard();
         }
 
+        function animateHomeDayChange(targetDay, exitDirection) {
+            const card = document.getElementById('homeDayCard');
+            const nextDay = Math.min(8, Math.max(1, targetDay));
+            if (!card || nextDay === homeActiveDayNum) {
+                snapHomeCardBack();
+                return;
+            }
+
+            card.style.transition = 'transform 180ms ease, opacity 180ms ease';
+            card.style.transform = `translateX(${exitDirection * 115}%) rotate(${exitDirection * 4}deg)`;
+            card.style.opacity = '0.2';
+
+            setTimeout(() => {
+                homeActiveDayNum = nextDay;
+                renderHomeDayCard();
+                card.style.transition = 'none';
+                card.style.transform = `translateX(${-exitDirection * 32}px)`;
+                card.style.opacity = '0.25';
+
+                requestAnimationFrame(() => {
+                    card.style.transition = 'transform 220ms ease, opacity 220ms ease';
+                    card.style.transform = 'translateX(0)';
+                    card.style.opacity = '1';
+                });
+            }, 180);
+        }
+
+        function snapHomeCardBack() {
+            const card = document.getElementById('homeDayCard');
+            if (!card) return;
+            card.style.transition = 'transform 180ms ease, opacity 180ms ease';
+            card.style.transform = 'translateX(0) rotate(0deg)';
+            card.style.opacity = '1';
+        }
+
+        function openSunsetSource(event) {
+            event?.stopPropagation();
+            window.open('https://www.timeofsunrise.com/paris/june', '_blank', 'noopener');
+        }
+
         function openHomeDayDetail() {
             showDay(homeActiveDayNum);
             switchTab('itinerary');
@@ -1370,14 +1434,33 @@
                 const touch = event.changedTouches[0];
                 homeTouchStartX = touch.clientX;
                 homeTouchStartY = touch.clientY;
+                homeDragDeltaX = 0;
+                homeIsDragging = true;
+                card.style.transition = 'none';
             }, { passive: true });
+
+            card.addEventListener('touchmove', event => {
+                if (!homeIsDragging) return;
+                const touch = event.changedTouches[0];
+                const diffX = touch.clientX - homeTouchStartX;
+                const diffY = touch.clientY - homeTouchStartY;
+                if (Math.abs(diffY) > Math.abs(diffX)) return;
+                event.preventDefault();
+                homeDragDeltaX = Math.max(-140, Math.min(140, diffX));
+                card.style.transform = `translateX(${homeDragDeltaX}px) rotate(${homeDragDeltaX / 45}deg)`;
+                card.style.opacity = String(Math.max(0.82, 1 - Math.abs(homeDragDeltaX) / 420));
+            }, { passive: false });
 
             card.addEventListener('touchend', event => {
                 const touch = event.changedTouches[0];
                 const diffX = touch.clientX - homeTouchStartX;
                 const diffY = touch.clientY - homeTouchStartY;
-                if (Math.abs(diffX) < 50 || Math.abs(diffX) < Math.abs(diffY)) return;
-                goHomeDay(homeActiveDayNum + (diffX > 0 ? 1 : -1));
+                homeIsDragging = false;
+                if (Math.abs(diffX) < 60 || Math.abs(diffX) < Math.abs(diffY)) {
+                    snapHomeCardBack();
+                    return;
+                }
+                animateHomeDayChange(homeActiveDayNum + (diffX > 0 ? 1 : -1), diffX > 0 ? 1 : -1);
             }, { passive: true });
         }
 
@@ -1837,6 +1920,7 @@
         window.updateCurrentLocation = updateCurrentLocation;
         window.goHomeDay = goHomeDay;
         window.openHomeDayDetail = openHomeDayDetail;
+        window.openSunsetSource = openSunsetSource;
         window.shiftEventTime = shiftEventTime;
         
         // 동기화 제어 핸들러 전역 바인딩
@@ -1847,6 +1931,8 @@
 
         initItinerary();
         populateSwapSelectors();
+        updateTripClockInfo();
+        setInterval(updateTripClockInfo, 60000);
         renderHomeDayCard();
         setupHomeDaySwipe();
         showDay(activeDayNum);
