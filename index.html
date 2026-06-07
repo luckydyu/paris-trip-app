@@ -72,22 +72,21 @@
         
         <!-- 앱 헤더 (여행자 정보 최적화) -->
         <header class="bg-parisBlue text-white px-4 pt-6 pb-4 sticky top-0 z-30 shadow-md">
-            <div class="flex justify-between items-center">
-                <div class="flex flex-col">
-                    <div class="flex items-center space-x-2">
+            <div class="flex justify-between items-start gap-2">
+                <div class="flex flex-col min-w-0 flex-1">
+                    <div class="flex items-center space-x-2 min-w-0">
                         <button onclick="switchTab('home')" class="text-lg font-bold tracking-tight text-white hover:text-white focus:text-white active:text-white transition-colors text-left" aria-label="첫 화면으로 이동">
                             Paris-Family 🗼
                         </button>
-                        <div class="flex items-center space-x-1">
-                            <span class="bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded font-medium border border-slate-700/50">파리 <span id="parisTimeText">--:--</span></span>
-                            <span class="bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded font-medium border border-slate-700/50">서울 <span id="seoulTimeText">--:--</span></span>
-                        </div>
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-0.5 font-medium">파리 여름 바캉스 가이드</p>
+                    <div class="grid grid-cols-2 gap-1 mt-1 max-w-[260px]">
+                        <span class="bg-slate-800 text-slate-300 text-[10px] px-1.5 py-1 rounded font-medium border border-slate-700/50 whitespace-nowrap">파리 <span id="parisTimeText">--/-- --:--</span></span>
+                        <span class="bg-slate-800 text-slate-300 text-[10px] px-1.5 py-1 rounded font-medium border border-slate-700/50 whitespace-nowrap">서울 <span id="seoulTimeText">--/-- --:--</span></span>
+                    </div>
                 </div>
                 
                 <!-- 상단 간편 토글 정보 버튼 -->
-                <div class="flex items-center space-x-1.5 text-slate-300">
+                <div class="flex items-center space-x-1.5 text-slate-300 shrink-0">
                     <!-- 온/오프라인 상태 배지 -->
                     <button onclick="toggleOfflineMode()" id="offlineBtn" class="flex items-center space-x-1 px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:text-white transition-all">
                         <i id="offlineIcon" class="fa-solid fa-cloud text-[10px]"></i>
@@ -130,7 +129,7 @@
             <!-- ================= TAB 1: 대시보드 (홈) ================= -->
             <section id="tab-home" class="space-y-4">
                 <!-- 일차별 스와이프 추천 카드 -->
-                <div id="homeDayCard" class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden touch-pan-y select-none">
+                <div id="homeDayCard" class="relative overflow-hidden touch-pan-y select-none -mx-1 px-1">
                     <!-- JS 연동 바인딩 -->
                 </div>
 
@@ -287,15 +286,14 @@
                             </div>
                         </div>
 
-                        <!-- 일정 편집 및 복구 관리 -->
+                        <!-- 일정 편집 관리 -->
                         <div class="border-t border-amber-200/50 pt-2 flex justify-between items-center">
                             <div>
                                 <p class="font-bold text-amber-900"><i class="fa-solid fa-pen-nib mr-1"></i> 2. 일정 관리 모드</p>
-                                <p class="text-[11px] text-slate-500">가족 일정을 임의로 추가하거나 처음으로 초기화합니다.</p>
+                                <p class="text-[11px] text-slate-500">가족 일정을 시간순으로 추가하고 공유합니다.</p>
                             </div>
                             <div class="flex space-x-1.5">
                                 <button onclick="openAddEventModal()" class="bg-parisBlue text-white font-bold px-2.5 py-1.5 rounded hover:bg-slate-800 transition"><i class="fa-solid fa-plus mr-1"></i>추가</button>
-                                <button onclick="confirmResetItinerary()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2.5 py-1.5 rounded transition"><i class="fa-solid fa-rotate-left mr-1"></i>복구</button>
                             </div>
                         </div>
                     </div>
@@ -322,7 +320,7 @@
                 <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
                     <h3 class="font-bold text-slate-800 text-sm mb-3"><i class="fa-solid fa-pen-to-square text-parisGold mr-1.5"></i> 우리 가족 메모 / 오늘 지출 기록</h3>
                     <textarea id="dailyMemo" rows="3" placeholder="오늘 방문한 맛집 정보나 가계부 내역을 기록해 두세요. (자동 공유 저장)" class="w-full text-xs p-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-parisGold bg-slate-50/50"></textarea>
-                    <button onclick="saveDailyMemo()" class="mt-2 w-full bg-slate-800 text-white font-bold py-2 rounded-lg text-xs hover:bg-slate-900 transition">메모 저장 및 백업</button>
+                    <button onclick="saveDailyMemo()" class="mt-2 w-full bg-slate-800 text-white font-bold py-2 rounded-lg text-xs hover:bg-slate-900 transition">메모 저장 및 가족 동기화</button>
                 </div>
             </section>
 
@@ -764,6 +762,7 @@
         let currentUser = null;
         let currentGroupCode = null;
         let unsubscribeGroupListener = null;
+        let memosData = {};
 
         // 아시아나 OZ501 탑승 기반 추천 파리 8일 일정 디비
         const defaultItineraryData = {
@@ -976,6 +975,13 @@
                             showToast("가족 단말기 실시간 동기화 완료! 👥");
                         }
                     }
+                    if (incoming && incoming.memos) {
+                        if (JSON.stringify(memosData) !== JSON.stringify(incoming.memos)) {
+                            memosData = incoming.memos;
+                            saveMemosLocalOnly();
+                            document.getElementById('dailyMemo').value = memosData[activeDayNum] || '';
+                        }
+                    }
                 }
             }, (error) => {
                 console.error("Firestore onSnapshot 에러:", error);
@@ -993,6 +999,7 @@
             try {
                 await setDoc(docRef, { 
                     itinerary: itineraryData,
+                    memos: memosData,
                     created_by: currentUser.uid,
                     updated_at: new Date().toISOString()
                 });
@@ -1030,6 +1037,11 @@
                         saveItineraryLocalOnly();
                         showDay(activeDayNum);
                     }
+                    if (data && data.memos) {
+                        memosData = data.memos;
+                        saveMemosLocalOnly();
+                        document.getElementById('dailyMemo').value = memosData[activeDayNum] || '';
+                    }
                     currentGroupCode = codeInput;
                     localStorage.setItem('paris_family_joined_group', codeInput);
                     activateSyncUI(codeInput);
@@ -1039,6 +1051,7 @@
                     // 미존재시 수동 생성 처리
                     await setDoc(docRef, { 
                         itinerary: itineraryData,
+                        memos: memosData,
                         created_by: currentUser.uid,
                         updated_at: new Date().toISOString()
                     });
@@ -1107,8 +1120,30 @@
             }
         }
 
+        function initMemos() {
+            const savedMemos = localStorage.getItem('paris_family_memos_v1');
+            if (savedMemos) {
+                try {
+                    memosData = JSON.parse(savedMemos);
+                    return;
+                } catch (e) {
+                    memosData = {};
+                }
+            }
+
+            for (let day = 1; day <= 8; day++) {
+                const legacyMemo = localStorage.getItem(`paris_memo_day_${day}`);
+                if (legacyMemo) memosData[day] = legacyMemo;
+            }
+            saveMemosLocalOnly();
+        }
+
         function saveItineraryLocalOnly() {
             localStorage.setItem('paris_family_itinerary_v2', JSON.stringify(itineraryData));
+        }
+
+        function saveMemosLocalOnly() {
+            localStorage.setItem('paris_family_memos_v1', JSON.stringify(memosData));
         }
 
         // 로컬 영구저장 후 클라우드로 자동 푸시
@@ -1120,6 +1155,7 @@
                 try {
                     await setDoc(docRef, { 
                         itinerary: itineraryData,
+                        memos: memosData,
                         updated_at: new Date().toISOString()
                     }, { merge: true });
                 } catch (e) {
@@ -1275,22 +1311,6 @@
             openModal('customConfirmModal');
         }
 
-        // 초기 복원 리셋
-        function confirmResetItinerary() {
-            openConfirmModal(
-                "일정 복구 확인",
-                "수정되었던 모든 커스텀 일정이 영구 삭제되고, 최초 기획된 파리 추천 일정 가이드로 원상 복구됩니다. 진행하시겠습니까?",
-                () => {
-                    itineraryData = JSON.parse(JSON.stringify(defaultItineraryData));
-                    saveItinerary();
-                    populateSwapSelectors();
-                    showDay(activeDayNum);
-                    closeModal('customConfirmModal');
-                    showToast("최초 가이드 일정으로 리셋되었습니다!");
-                }
-            );
-        }
-
         // 토스트 알림바 출력
         function showToast(msg) {
             const toast = document.getElementById('copyToast');
@@ -1303,9 +1323,9 @@
 
         function updateTripClockInfo() {
             const now = new Date();
-            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
-            const parisTime = new Intl.DateTimeFormat('ko-KR', { ...timeOptions, timeZone: 'Europe/Paris' }).format(now);
-            const seoulTime = new Intl.DateTimeFormat('ko-KR', { ...timeOptions, timeZone: 'Asia/Seoul' }).format(now);
+            const timeOptions = { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
+            const parisTime = new Intl.DateTimeFormat('ko-KR', { ...timeOptions, timeZone: 'Europe/Paris' }).format(now).replace('. ', '/').replace('.', '');
+            const seoulTime = new Intl.DateTimeFormat('ko-KR', { ...timeOptions, timeZone: 'Asia/Seoul' }).format(now).replace('. ', '/').replace('.', '');
 
             document.getElementById('parisTimeText').innerText = parisTime;
             document.getElementById('seoulTimeText').innerText = seoulTime;
@@ -1332,48 +1352,63 @@
             const card = document.getElementById('homeDayCard');
             if (!card) return;
 
-            const data = homeDayCards[homeActiveDayNum];
-            const dayNumber = String(homeActiveDayNum).padStart(2, '0');
-            const badgeHtml = data.isSunset
-                ? `<button onclick="openSunsetSource(event)" class="text-sm bg-white/10 px-2 py-1 rounded text-slate-200 hover:bg-white/20 transition" aria-label="일몰 시간 출처 열기">${data.badge}</button>`
-                : `<span class="text-sm bg-white/10 px-2 py-1 rounded text-slate-200">${data.badge}</span>`;
             const indicators = Object.keys(homeDayCards).map(day => {
                 const isActive = Number(day) === homeActiveDayNum;
                 return `<button onclick="goHomeDay(${day})" class="h-1.5 rounded-full transition-all ${isActive ? 'w-5 bg-parisGold' : 'w-1.5 bg-white/30'}" aria-label="${day}일차 보기"></button>`;
             }).join('');
+            const uniqueDays = getHomeVisibleDays(homeActiveDayNum);
 
             card.innerHTML = `
-                <div class="absolute -right-6 -bottom-6 text-slate-700/20 text-9xl font-bold">${dayNumber}</div>
-                <div class="flex justify-between items-start gap-3">
-                    <div>
-                        <span class="text-parisGold font-semibold text-sm">${data.date} - DAY ${homeActiveDayNum}</span>
-                        <h2 class="text-2xl font-bold mt-1">"${data.headline}"</h2>
-                    </div>
-                    <div class="text-right shrink-0">
-                        ${badgeHtml}
-                    </div>
+                <div id="homeCardTrack" class="flex gap-3 will-change-transform" style="transform: ${getHomeTrackTransform(homeActiveDayNum, 0)};">
+                    ${uniqueDays.map(day => renderHomeDayPanel(day)).join('')}
                 </div>
-                
-                <div class="mt-4 border-t border-slate-700/60 pt-4 space-y-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-2 h-2 rounded-full bg-parisGold animate-ping"></div>
-                        <p class="text-sm text-slate-200 font-medium">${data.focus}</p>
-                    </div>
-                    <p class="text-xs text-slate-400">${data.note}</p>
-                </div>
-
-                <div class="mt-4 flex space-x-2">
-                    <button onclick="openHomeDayDetail()" class="flex-1 bg-parisGold hover:bg-amber-500 text-slate-950 py-2 rounded-lg font-bold text-xs transition">
-                        DAY ${homeActiveDayNum} 동선 상세보기 <i class="fa-solid fa-arrow-right ml-1"></i>
-                    </button>
-                    <button onclick="openModal('emergencyModal')" class="bg-parisRed text-white px-3 py-2 rounded-lg font-bold text-xs flex items-center justify-center">
-                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> SOS
-                    </button>
-                </div>
-                <div class="mt-4 flex items-center justify-between">
-                    <button onclick="goHomeDay(${Math.max(1, homeActiveDayNum - 1)})" class="w-8 h-8 rounded-full bg-white/10 text-white/80 disabled:opacity-30" ${homeActiveDayNum === 1 ? 'disabled' : ''} aria-label="이전 날"><i class="fa-solid fa-chevron-left text-[10px]"></i></button>
+                <div class="mt-3 flex items-center justify-center">
                     <div class="flex items-center space-x-1.5">${indicators}</div>
-                    <button onclick="goHomeDay(${Math.min(8, homeActiveDayNum + 1)})" class="w-8 h-8 rounded-full bg-white/10 text-white/80 disabled:opacity-30" ${homeActiveDayNum === 8 ? 'disabled' : ''} aria-label="다음 날"><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                </div>
+            `;
+        }
+
+        function getHomeVisibleDays(centerDay) {
+            return [...new Set([Math.max(1, centerDay - 1), centerDay, Math.min(8, centerDay + 1)])];
+        }
+
+        function getHomeTrackTransform(activeDay, dragPx = 0) {
+            const activeIndex = getHomeVisibleDays(activeDay).indexOf(activeDay);
+            return `translateX(calc(-1 * (${activeIndex} * (88% + 12px)) + ${dragPx}px))`;
+        }
+
+        function renderHomeDayPanel(dayNum) {
+            const data = homeDayCards[dayNum];
+            const dayNumber = String(dayNum).padStart(2, '0');
+            const isActive = dayNum === homeActiveDayNum;
+            const badgeHtml = data.isSunset
+                ? `<button onclick="openSunsetSource(event)" class="text-sm bg-white/10 px-2 py-1 rounded text-slate-200 hover:bg-white/20 transition" aria-label="일몰 시간 출처 열기">${data.badge}</button>`
+                : `<span class="text-sm bg-white/10 px-2 py-1 rounded text-slate-200">${data.badge}</span>`;
+
+            return `
+                <div class="relative min-w-[88%] bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 shadow-lg overflow-hidden ${isActive ? '' : 'opacity-70'}">
+                    <div class="absolute -right-6 -bottom-6 text-slate-700/20 text-9xl font-bold">${dayNumber}</div>
+                    <div class="flex justify-between items-start gap-3">
+                        <div>
+                            <span class="text-parisGold font-semibold text-sm">${data.date} - DAY ${dayNum}</span>
+                            <h2 class="text-2xl font-bold mt-1">"${data.headline}"</h2>
+                        </div>
+                        <div class="text-right shrink-0">${badgeHtml}</div>
+                    </div>
+                    <div class="mt-4 border-t border-slate-700/60 pt-4 space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 rounded-full bg-parisGold animate-ping"></div>
+                            <p class="text-sm text-slate-200 font-medium">${data.focus}</p>
+                        </div>
+                        <p class="text-xs text-slate-400">${data.note}</p>
+                    </div>
+                    ${isActive ? `
+                        <div class="mt-4">
+                            <button onclick="openHomeDayDetail()" class="w-full bg-parisGold hover:bg-amber-500 text-slate-950 py-2 rounded-lg font-bold text-xs transition">
+                                DAY ${homeActiveDayNum} 동선 상세보기 <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }
@@ -1384,38 +1419,24 @@
         }
 
         function animateHomeDayChange(targetDay, exitDirection) {
-            const card = document.getElementById('homeDayCard');
+            const card = document.getElementById('homeCardTrack');
             const nextDay = Math.min(8, Math.max(1, targetDay));
             if (!card || nextDay === homeActiveDayNum) {
                 snapHomeCardBack();
                 return;
             }
 
-            card.style.transition = 'transform 180ms ease, opacity 180ms ease';
-            card.style.transform = `translateX(${exitDirection * 115}%) rotate(${exitDirection * 4}deg)`;
-            card.style.opacity = '0.2';
+            card.style.transition = 'transform 180ms ease';
+            card.style.transform = getHomeTrackTransform(homeActiveDayNum, exitDirection * 260);
 
             setTimeout(() => {
                 homeActiveDayNum = nextDay;
                 renderHomeDayCard();
-                card.style.transition = 'none';
-                card.style.transform = `translateX(${-exitDirection * 32}px)`;
-                card.style.opacity = '0.25';
-
-                requestAnimationFrame(() => {
-                    card.style.transition = 'transform 220ms ease, opacity 220ms ease';
-                    card.style.transform = 'translateX(0)';
-                    card.style.opacity = '1';
-                });
             }, 180);
         }
 
         function snapHomeCardBack() {
-            const card = document.getElementById('homeDayCard');
-            if (!card) return;
-            card.style.transition = 'transform 180ms ease, opacity 180ms ease';
-            card.style.transform = 'translateX(0) rotate(0deg)';
-            card.style.opacity = '1';
+            renderHomeDayCard();
         }
 
         function openSunsetSource(event) {
@@ -1438,19 +1459,21 @@
                 homeTouchStartY = touch.clientY;
                 homeDragDeltaX = 0;
                 homeIsDragging = true;
-                card.style.transition = 'none';
+                const track = document.getElementById('homeCardTrack');
+                if (track) track.style.transition = 'none';
             }, { passive: true });
 
             card.addEventListener('touchmove', event => {
                 if (!homeIsDragging) return;
+                const track = document.getElementById('homeCardTrack');
+                if (!track) return;
                 const touch = event.changedTouches[0];
                 const diffX = touch.clientX - homeTouchStartX;
                 const diffY = touch.clientY - homeTouchStartY;
                 if (Math.abs(diffY) > Math.abs(diffX)) return;
                 event.preventDefault();
-                homeDragDeltaX = Math.max(-140, Math.min(140, diffX));
-                card.style.transform = `translateX(${homeDragDeltaX}px) rotate(${homeDragDeltaX / 45}deg)`;
-                card.style.opacity = String(Math.max(0.82, 1 - Math.abs(homeDragDeltaX) / 420));
+                homeDragDeltaX = Math.max(-180, Math.min(180, diffX));
+                track.style.transform = getHomeTrackTransform(homeActiveDayNum, homeDragDeltaX);
             }, { passive: false });
 
             card.addEventListener('touchend', event => {
@@ -1462,7 +1485,7 @@
                     snapHomeCardBack();
                     return;
                 }
-                animateHomeDayChange(homeActiveDayNum + (diffX > 0 ? 1 : -1), diffX > 0 ? 1 : -1);
+                animateHomeDayChange(homeActiveDayNum + (diffX < 0 ? 1 : -1), diffX < 0 ? -1 : 1);
             }, { passive: true });
         }
 
@@ -1757,8 +1780,7 @@
 
             document.getElementById('itineraryDetailCard').innerHTML = cardHtml;
 
-            const savedMemo = localStorage.getItem(`paris_memo_day_${dayNum}`);
-            document.getElementById('dailyMemo').value = savedMemo ? savedMemo : '';
+            document.getElementById('dailyMemo').value = memosData[dayNum] || '';
         }
 
         // 개별 타임라인 순서 재배열 제어
@@ -1843,10 +1865,26 @@
             closeModal('addEditEventModal');
         }
 
-        function saveDailyMemo() {
+        async function saveDailyMemo() {
             const memoText = document.getElementById('dailyMemo').value;
-            localStorage.setItem(`paris_memo_day_${activeDayNum}`, memoText);
-            showToast(`Day ${activeDayNum} 가계부 및 메모 백업 완료!`);
+            memosData[activeDayNum] = memoText;
+            saveMemosLocalOnly();
+
+            if (db && currentUser && currentGroupCode) {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'groups', currentGroupCode);
+                try {
+                    await setDoc(docRef, {
+                        memos: memosData,
+                        updated_at: new Date().toISOString()
+                    }, { merge: true });
+                    showToast(`Day ${activeDayNum} 메모 가족 동기화 완료!`);
+                    return;
+                } catch (e) {
+                    console.error("메모 클라우드 동기화 실패:", e);
+                }
+            }
+
+            showToast(`Day ${activeDayNum} 메모 로컬 저장 완료`);
         }
 
         // 유로 ↔ 원화 동적 환산기
@@ -1976,6 +2014,7 @@
         window.copyGroupCode = copyGroupCode;
 
         initItinerary();
+        initMemos();
         populateSwapSelectors();
         updateTripClockInfo();
         setInterval(updateTripClockInfo, 60000);
