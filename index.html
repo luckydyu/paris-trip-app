@@ -99,10 +99,10 @@
                         <span id="syncText" class="text-[10px] font-bold leading-none">단독</span>
                     </button>
 
-                    <!-- 공지 알림 아이콘 -->
-                    <button onclick="openModal('notificationModal')" class="hover:text-white relative p-1 transition-colors">
+                    <!-- 가족 동기화 변경 알림 -->
+                    <button onclick="openNotificationModal()" class="hover:text-white relative p-1 transition-colors" aria-label="가족 동기화 변경 알림">
                         <i class="fa-solid fa-bell text-sm"></i>
-                        <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-parisGold rounded-full"></span>
+                        <span id="notificationDot" class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-parisGold rounded-full hidden"></span>
                     </button>
                 </div>
             </div>
@@ -112,8 +112,8 @@
                 <button onclick="openModal('flightInfoModal')" class="flex items-center space-x-2 text-left hover:bg-white/5 rounded-lg px-1 py-1 transition" aria-label="OZ501 항공편 정보 열기">
                     <i class="fa-solid fa-plane-departure text-parisGold"></i>
                     <div>
-                        <p class="font-semibold text-white">OZ 501 (인천 -> 파리)</p>
-                        <p>6/27 10:05 출발 · 눌러서 항공 정보</p>
+                        <p id="flightHeaderTitle" class="font-semibold text-white">OZ 501 (인천 -> 파리)</p>
+                        <p id="flightHeaderSub">6/27 10:05 출발 · 눌러서 항공 정보</p>
                     </div>
                 </button>
                 <div class="text-right">
@@ -570,21 +570,21 @@
             </div>
         </div>
 
-        <!-- 팁 및 가이드 팝업 공지 -->
+        <!-- 가족 동기화 변경 알림 -->
         <div id="notificationModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
                 <div class="bg-parisBlue text-white p-4 flex justify-between items-center">
-                    <h3 class="font-bold text-sm">알림 및 안내 공지</h3>
+                    <h3 class="font-bold text-sm">가족 동기화 변경 알림</h3>
                     <button onclick="closeModal('notificationModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
-                <div class="p-5 space-y-3.5 text-xs text-slate-600">
-                    <p class="font-semibold text-slate-800 text-sm">🗼 6월 말 파리 정기세일(Soldes) 관련 안내</p>
-                    <p>파리의 연례 여름 정기 할인(Les Soldes) 기간이 여행 기간에 포함됩니다. 마레지구, 라파예트 백화점 등에서 30%~70% 대규모 할인이 시작됩니다.</p>
-                    <p class="border-t border-slate-100 pt-2 font-semibold text-slate-800 text-sm">☀️ 긴 일몰 시간 안내</p>
-                    <p>오후 10시가 지나야 완전히 일몰이 이루어지므로 야간 산책 시 가족들의 체력 분배(낮잠, 중간 휴식)에 유의하시기 바랍니다.</p>
+                <div id="notificationList" class="p-5 space-y-2 text-xs text-slate-600">
+                    <div class="bg-slate-50 border border-slate-100 rounded-lg p-3">
+                        <p class="font-bold text-slate-800">아직 가족 변경 알림이 없습니다.</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">다른 가족 기기에서 일정이나 메모를 바꾸면 여기에 표시됩니다.</p>
+                    </div>
                 </div>
                 <div class="p-3 bg-slate-50 border-t border-slate-100 text-right">
-                    <button onclick="closeModal('notificationModal')" class="bg-parisBlue text-white px-4 py-2 rounded-lg font-bold text-xs">확인했습니다</button>
+                    <button onclick="clearNotifications()" class="bg-parisBlue text-white px-4 py-2 rounded-lg font-bold text-xs">확인 완료</button>
                 </div>
             </div>
         </div>
@@ -593,13 +593,13 @@
         <div id="flightInfoModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
                 <div class="bg-parisBlue text-white p-4 flex justify-between items-center">
-                    <h3 class="font-bold text-sm">OZ501 항공편 허브</h3>
+                    <h3 id="flightModalTitle" class="font-bold text-sm">OZ501 항공편 허브</h3>
                     <button onclick="closeModal('flightInfoModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
                 </div>
                 <div class="p-5 space-y-3 text-xs text-slate-600">
-                    <p class="font-semibold text-slate-900 text-sm">6/27 10:05 ICN → 17:20 CDG</p>
+                    <p id="flightModalRoute" class="font-semibold text-slate-900 text-sm">6/27 10:05 ICN → 17:20 CDG</p>
                     <p>항공권 원본은 가족 예약 메일/여행사 앱에 보관하고, 이 앱에서는 실시간 운항 확인과 공식 체크인 동선으로 빠르게 연결하는 구성이 가장 안전합니다.</p>
-                    <div class="grid gap-2">
+                    <div id="flightLinkList" class="grid gap-2">
                         <a href="https://flyasiana.com/" target="_blank" rel="noopener" class="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 font-bold text-slate-800">
                             아시아나 공식 사이트 <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-parisGold"></i>
                         </a>
@@ -613,6 +613,24 @@
                 </div>
                 <div class="p-3 bg-slate-50 border-t border-slate-100 text-right">
                     <button onclick="closeModal('flightInfoModal')" class="bg-parisBlue text-white px-4 py-2 rounded-lg font-bold text-xs">닫기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 일차 제목 편집 모달 -->
+        <div id="dayTitleModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl">
+                <div class="bg-parisBlue text-white p-4 flex justify-between items-center">
+                    <h3 class="font-bold text-sm">일차 제목 편집</h3>
+                    <button onclick="closeModal('dayTitleModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div class="p-5 space-y-3 text-xs text-slate-600">
+                    <label class="block text-slate-500 font-bold">카드와 상세 일정에 함께 표시될 제목</label>
+                    <input type="text" id="dayTitleInput" class="w-full p-3 rounded-lg border border-slate-200 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-parisGold">
+                </div>
+                <div class="p-3 bg-slate-50 border-t border-slate-100 flex space-x-2">
+                    <button onclick="closeModal('dayTitleModal')" class="flex-1 bg-white border border-slate-200 py-2 rounded-lg text-xs font-semibold text-slate-600">취소</button>
+                    <button onclick="saveDayTitleAction()" class="flex-1 bg-parisGold text-white py-2 rounded-lg font-bold text-xs">저장</button>
                 </div>
             </div>
         </div>
@@ -763,11 +781,12 @@
         let currentGroupCode = null;
         let unsubscribeGroupListener = null;
         let memosData = {};
+        let syncNotifications = [];
 
         // 아시아나 OZ501 탑승 기반 추천 파리 8일 일정 디비
         const defaultItineraryData = {
             1: {
-                title: "6/27 (토) - 1일차: 설레는 파리 도착",
+                title: "6/27 (토) - 1일차: 로맨틱한 파리 도착",
                 spot: "인천공항 -> 파리 샤를드골(CDG) -> 숙소 체크인",
                 details: [
                     "10:05 아시아나 OZ501 탑승 (약 14시간 비행)",
@@ -780,7 +799,7 @@
                 tip: "공항 내 불법 호객 행위 택시는 절대 타지 마세요. 무조건 'Taxi Parisien' 전용 라인에서 탑승해야 안전합니다."
             },
             2: {
-                title: "6/28 (일) - 2일차: 낭만적인 파리 골목",
+                title: "6/28 (일) - 2일차: 몽마르뜨와 에펠탑 피크닉",
                 spot: "몽마르뜨 언덕 & 에펠탑 피크닉",
                 details: [
                     "오전: 사크레쾨르 성당 투어 및 화가들의 광장(테르트르 광장)",
@@ -793,7 +812,7 @@
                 tip: "몽마르뜨 언덕 근처 실 팔찌 강매 사기꾼들을 주의하고 소지품을 잘 지키세요."
             },
             3: {
-                title: "6/29 (월) - 3일차: 빛나는 교외 나들이",
+                title: "6/29 (월) - 3일차: 모네와 고흐의 교외 나들이",
                 spot: "지베르니 & 오베르 쉬르 우아즈 전일 투어",
                 details: [
                     "08:00 교외 가이드 차량 투어 탑승",
@@ -805,7 +824,7 @@
                 tip: "모네의 집 정원은 꽃이 만발하는 6월 말~7월 초가 1년 중 가장 화려하고 예쁩니다."
             },
             4: {
-                title: "6/30 (화) - 4일차: 파리의 일상과 쇼핑",
+                title: "6/30 (화) - 4일차: 마레 쇼핑과 튈르리 휴식",
                 spot: "마레지구 쇼핑 & 튈르리 정원 힐링",
                 details: [
                     "메트로를 이용해 트렌디한 마레지구(Le Marais) 이동",
@@ -817,7 +836,7 @@
                 tip: "7월 초는 대세일 기간이라 메이저 백화점 및 상점에 대기 줄이 길 수 있으니 편안한 운동화가 필수입니다."
             },
             5: {
-                title: "7/1 (수) - 5일차: 인류 문화유산의 숨결",
+                title: "7/1 (수) - 5일차: 루브르 핵심 작품 투어",
                 spot: "루브르 박물관 집중 투어",
                 details: [
                     "13:30 루브르 박물관 공인 가이드 미팅 (예약 필수)",
@@ -829,7 +848,7 @@
                 tip: "루브르 내부는 매우 덥고 건조하니 작은 물병과 아이들이 쉴 수 있는 간단한 사탕을 챙겨 가세요."
             },
             6: {
-                title: "7/2 (목) - 6일차: 예술과 지성의 만남",
+                title: "7/2 (목) - 6일차: 오르세와 판테온",
                 spot: "오르세 미술관 & 판테온 투어 (뮤지엄패스 개시)",
                 details: [
                     "뮤지엄패스 2일권 정식 개시 및 첫 관람",
@@ -841,7 +860,7 @@
                 tip: "오르세 미술관의 상징적인 시계탑 거울 뒤편에서 촬영하는 가족 실루엣 사진은 빼놓을 수 없는 촬영 명소입니다."
             },
             7: {
-                title: "7/3 (금) - 7일차: 절대왕정의 극치와 전망",
+                title: "7/3 (금) - 7일차: 베르사유와 개선문",
                 spot: "베르사유 궁전 & 개선문 야경",
                 details: [
                     "09:00 베르사유 궁전(Château de Versailles) 입장",
@@ -853,7 +872,7 @@
                 tip: "베르사유 정원은 여름 분수쇼가 열리는 시기로 인당 10유로 상당의 추가 입장료가 있으니 현금을 일부 구비해 가세요."
             },
             8: {
-                title: "7/4 (토) - 8일차: 아이들과 유익한 시간 및 작별",
+                title: "7/4 (토) - 8일차: 과학관과 귀국 준비",
                 spot: "라 빌레트 과학관 & 샤를드골 공항 귀국",
                 details: [
                     "오전: 라 빌레트 과학산업관(Cité des Sciences) 어린이 체험형 테마존 방문",
@@ -971,7 +990,9 @@
                         if (JSON.stringify(itineraryData) !== JSON.stringify(incoming.itinerary)) {
                             itineraryData = incoming.itinerary;
                             saveItineraryLocalOnly();
+                            renderHomeDayCard();
                             showDay(activeDayNum);
+                            addSyncNotification('일정 변경', `가족 기기에서 Day ${activeDayNum} 일정이 업데이트되었습니다.`);
                             showToast("가족 단말기 실시간 동기화 완료! 👥");
                         }
                     }
@@ -980,6 +1001,7 @@
                             memosData = incoming.memos;
                             saveMemosLocalOnly();
                             document.getElementById('dailyMemo').value = memosData[activeDayNum] || '';
+                            addSyncNotification('메모 변경', `가족 기기에서 Day ${activeDayNum} 메모가 업데이트되었습니다.`);
                         }
                     }
                 }
@@ -1321,6 +1343,108 @@
             }, 3000);
         }
 
+        function getDayDisplayTitle(dayNum) {
+            const title = itineraryData[dayNum]?.title || defaultItineraryData[dayNum]?.title || '';
+            return title.includes(':') ? title.split(':').slice(1).join(':').trim() : title;
+        }
+
+        function replaceDayDisplayTitle(dayNum, nextTitle) {
+            const data = itineraryData[dayNum];
+            if (!data) return;
+            const parts = data.title.split(':');
+            data.title = parts.length > 1 ? `${parts[0]}: ${nextTitle}` : nextTitle;
+        }
+
+        function addSyncNotification(type, message) {
+            const timestamp = new Intl.DateTimeFormat('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+            syncNotifications.unshift({ type, message, timestamp });
+            syncNotifications = syncNotifications.slice(0, 10);
+            renderNotificationList();
+            document.getElementById('notificationDot').classList.remove('hidden');
+        }
+
+        function renderNotificationList() {
+            const list = document.getElementById('notificationList');
+            if (!list) return;
+
+            if (!syncNotifications.length) {
+                list.innerHTML = `
+                    <div class="bg-slate-50 border border-slate-100 rounded-lg p-3">
+                        <p class="font-bold text-slate-800">아직 가족 변경 알림이 없습니다.</p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">다른 가족 기기에서 일정이나 메모를 바꾸면 여기에 표시됩니다.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = syncNotifications.map(item => `
+                <div class="bg-slate-50 border border-slate-100 rounded-lg p-3">
+                    <div class="flex justify-between items-center">
+                        <p class="font-bold text-slate-800">${item.type}</p>
+                        <span class="text-[10px] text-slate-400">${item.timestamp}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 mt-1">${item.message}</p>
+                </div>
+            `).join('');
+        }
+
+        function openNotificationModal() {
+            renderNotificationList();
+            document.getElementById('notificationDot').classList.add('hidden');
+            openModal('notificationModal');
+        }
+
+        function clearNotifications() {
+            syncNotifications = [];
+            renderNotificationList();
+            document.getElementById('notificationDot').classList.add('hidden');
+            closeModal('notificationModal');
+        }
+
+        const flightInfos = {
+            outbound: {
+                code: 'OZ501',
+                title: 'OZ 501 (인천 -> 파리)',
+                sub: '6/27 10:05 출발 · 눌러서 항공 정보',
+                route: '6/27 10:05 ICN → 17:20 CDG',
+                links: [
+                    ['아시아나 공식 사이트', 'https://flyasiana.com/'],
+                    ['OZ501 실시간 운항 추적', 'https://www.flightstats.com/v2/flight-tracker/OZ/501'],
+                    ['OZ501 기본 스케줄', 'https://www.flight.info/OZ501']
+                ]
+            },
+            inbound: {
+                code: 'OZ502',
+                title: 'OZ 502 (파리 -> 인천)',
+                sub: '7/4 19:10 출발 · 귀국편 정보',
+                route: '7/4 19:10 CDG → 7/5 인천 도착',
+                links: [
+                    ['아시아나 공식 사이트', 'https://flyasiana.com/'],
+                    ['OZ502 실시간 운항 추적', 'https://www.flightstats.com/v2/flight-tracker/OZ/502'],
+                    ['OZ502 기본 스케줄', 'https://www.flight.info/OZ502']
+                ]
+            }
+        };
+
+        function getCurrentFlightInfo() {
+            const now = new Date();
+            const inboundSwitchAt = new Date('2026-06-27T17:20:00+02:00');
+            return now >= inboundSwitchAt ? flightInfos.inbound : flightInfos.outbound;
+        }
+
+        function updateFlightInfoUI() {
+            const info = getCurrentFlightInfo();
+            document.getElementById('flightHeaderTitle').innerText = info.title;
+            document.getElementById('flightHeaderSub').innerText = info.sub;
+            document.getElementById('flightModalTitle').innerText = `${info.code} 항공편 허브`;
+            document.getElementById('flightModalRoute').innerText = info.route;
+            document.getElementById('flightLinkList').innerHTML = info.links.map(([label, url]) => `
+                <a href="${url}" target="_blank" rel="noopener" class="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 font-bold text-slate-800">
+                    ${label} <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-parisGold"></i>
+                </a>
+            `).join('');
+        }
+
         function updateTripClockInfo() {
             const now = new Date();
             const timeOptions = { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
@@ -1338,14 +1462,14 @@
         }
 
         const homeDayCards = {
-            1: { date: "6월 27일 (토요일)", headline: "로맨틱 파리의 시작", badge: "일몰 21:59", isSunset: true, focus: "17:20 CDG 터미널 1 도착 예정", note: "입국 심사 후, 정액제 안심 공항 택시(우안 65유로)로 숙소 이동을 시작하세요." },
-            2: { date: "6월 28일 (일요일)", headline: "몽마르뜨와 에펠탑 피크닉", badge: "산책일", focus: "사크레쾨르 성당과 테르트르 광장", note: "오후에는 마르스 광장에서 가족 피크닉과 에펠탑 야경을 느긋하게 잡아두세요." },
-            3: { date: "6월 29일 (월요일)", headline: "모네와 고흐의 교외 나들이", badge: "차량 투어", focus: "08:00 교외 가이드 차량 투어", note: "지베르니와 오베르 쉬르 우아즈는 이동 시간이 길어 간식과 물을 넉넉히 챙기면 좋습니다." },
-            4: { date: "6월 30일 (화요일)", headline: "마레 쇼핑과 튈르리 휴식", badge: "Soldes", focus: "여름 정기 세일 쇼핑", note: "쇼핑 동선 뒤에는 튈르리 정원에서 쉬는 시간을 충분히 남겨두세요." },
-            5: { date: "7월 1일 (수요일)", headline: "루브르 핵심 작품 투어", badge: "예약 필수", focus: "13:30 루브르 공인 가이드 미팅", note: "박물관 내부는 체력 소모가 커서 핵심 작품 위주로 압축해서 보는 날입니다." },
-            6: { date: "7월 2일 (목요일)", headline: "오르세와 판테온", badge: "뮤지엄패스", focus: "13:00 오르세 미술관 입장", note: "시계탑 포토존과 판테온 푸코의 진자를 함께 묶어 예술과 과학의 하루로 잡았습니다." },
-            7: { date: "7월 3일 (금요일)", headline: "베르사유와 개선문", badge: "궁전일", focus: "09:00 베르사유 궁전 입장", note: "정원 이동이 많아 편한 신발과 햇빛 대비가 중요합니다." },
-            8: { date: "7월 4일 (토요일)", headline: "과학관과 귀국 준비", badge: "출국일", focus: "15:30 CDG 공항 출발", note: "텍스리펀드와 수하물 체크 시간을 넉넉히 잡고 공항으로 이동하세요." }
+            1: { date: "6월 27일 (토요일)", badge: "일몰 21:59", isSunset: true, focus: "17:20 CDG 터미널 1 도착 예정", note: "입국 심사 후, 정액제 안심 공항 택시(우안 65유로)로 숙소 이동을 시작하세요." },
+            2: { date: "6월 28일 (일요일)", badge: "산책일", focus: "사크레쾨르 성당과 테르트르 광장", note: "오후에는 마르스 광장에서 가족 피크닉과 에펠탑 야경을 느긋하게 잡아두세요." },
+            3: { date: "6월 29일 (월요일)", badge: "차량 투어", focus: "08:00 교외 가이드 차량 투어", note: "지베르니와 오베르 쉬르 우아즈는 이동 시간이 길어 간식과 물을 넉넉히 챙기면 좋습니다." },
+            4: { date: "6월 30일 (화요일)", badge: "Soldes", focus: "여름 정기 세일 쇼핑", note: "쇼핑 동선 뒤에는 튈르리 정원에서 쉬는 시간을 충분히 남겨두세요." },
+            5: { date: "7월 1일 (수요일)", badge: "예약 필수", focus: "13:30 루브르 공인 가이드 미팅", note: "박물관 내부는 체력 소모가 커서 핵심 작품 위주로 압축해서 보는 날입니다." },
+            6: { date: "7월 2일 (목요일)", badge: "뮤지엄패스", focus: "13:00 오르세 미술관 입장", note: "시계탑 포토존과 판테온 푸코의 진자를 함께 묶어 예술과 과학의 하루로 잡았습니다." },
+            7: { date: "7월 3일 (금요일)", badge: "궁전일", focus: "09:00 베르사유 궁전 입장", note: "정원 이동이 많아 편한 신발과 햇빛 대비가 중요합니다." },
+            8: { date: "7월 4일 (토요일)", badge: "출국일", focus: "15:30 CDG 공항 출발", note: "텍스리펀드와 수하물 체크 시간을 넉넉히 잡고 공항으로 이동하세요." }
         };
 
         function renderHomeDayCard() {
@@ -1391,7 +1515,7 @@
                     <div class="flex justify-between items-start gap-3">
                         <div>
                             <span class="text-parisGold font-semibold text-sm">${data.date} - DAY ${dayNum}</span>
-                            <h2 class="text-2xl font-bold mt-1">"${data.headline}"</h2>
+                            <h2 class="text-2xl font-bold mt-1">"${getDayDisplayTitle(dayNum)}"</h2>
                         </div>
                         <div class="text-right shrink-0">${badgeHtml}</div>
                     </div>
@@ -1620,20 +1744,21 @@
                 const diffY = touch.clientY - itineraryTouchStartY;
                 if (Math.abs(diffX) < 70 || Math.abs(diffX) < Math.abs(diffY)) return;
 
-                const nextDay = Math.min(8, Math.max(1, activeDayNum + (diffX > 0 ? 1 : -1)));
+                const nextDay = Math.min(8, Math.max(1, activeDayNum + (diffX < 0 ? 1 : -1)));
                 if (nextDay === activeDayNum) return;
 
-                card.style.transition = 'transform 160ms ease, opacity 160ms ease';
-                card.style.transform = `translateX(${diffX > 0 ? 24 : -24}px)`;
-                card.style.opacity = '0.65';
+                const direction = diffX < 0 ? -1 : 1;
+                card.style.transition = 'transform 220ms ease, opacity 220ms ease';
+                card.style.transform = `translateX(${direction * 48}px)`;
+                card.style.opacity = '0.45';
 
                 setTimeout(() => {
                     showDay(nextDay);
                     card.style.transition = 'none';
-                    card.style.transform = `translateX(${diffX > 0 ? -18 : 18}px)`;
-                    card.style.opacity = '0.65';
+                    card.style.transform = `translateX(${-direction * 42}px)`;
+                    card.style.opacity = '0.45';
                     requestAnimationFrame(() => {
-                        card.style.transition = 'transform 180ms ease, opacity 180ms ease';
+                        card.style.transition = 'transform 240ms ease, opacity 240ms ease';
                         card.style.transform = 'translateX(0)';
                         card.style.opacity = '1';
                     });
@@ -1765,7 +1890,10 @@
                     <span class="bg-indigo-50 text-indigo-700 border border-indigo-100 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wide">${data.tag}</span>
                     <span class="text-xs text-slate-400 font-bold">Day ${dayNum} / 8</span>
                 </div>
-                <h3 class="font-extrabold text-slate-900 text-base leading-snug mt-1">${data.title}</h3>
+                <div class="flex items-start justify-between gap-2 mt-1">
+                    <h3 class="font-extrabold text-slate-900 text-base leading-snug">${data.title}</h3>
+                    <button onclick="openDayTitleModal()" title="제목 수정" class="p-1.5 text-indigo-500 hover:text-indigo-700 transition text-xs shrink-0"><i class="fa-solid fa-pen"></i></button>
+                </div>
                 <p class="text-xs font-semibold text-parisGold mt-0.5"><i class="fa-solid fa-location-dot"></i> ${data.spot}</p>
                 
                 <div class="space-y-2 mt-4 border-t border-slate-100 pt-4">
@@ -1805,6 +1933,26 @@
             document.getElementById('eventTimeInput').value = getDefaultEventTime();
             document.getElementById('eventInputText').value = "";
             openModal('addEditEventModal');
+        }
+
+        function openDayTitleModal() {
+            document.getElementById('dayTitleInput').value = getDayDisplayTitle(activeDayNum);
+            openModal('dayTitleModal');
+        }
+
+        function saveDayTitleAction() {
+            const nextTitle = document.getElementById('dayTitleInput').value.trim();
+            if (!nextTitle) {
+                showToast("제목을 입력해 주세요.");
+                return;
+            }
+
+            replaceDayDisplayTitle(activeDayNum, nextTitle);
+            saveItinerary();
+            renderHomeDayCard();
+            showDay(activeDayNum);
+            closeModal('dayTitleModal');
+            showToast("일차 제목이 저장 및 동기화되었습니다.");
         }
 
         // 일정 편집 팝업 열기
@@ -2006,6 +2154,10 @@
         window.openHomeDayDetail = openHomeDayDetail;
         window.openSunsetSource = openSunsetSource;
         window.shiftEventTime = shiftEventTime;
+        window.openNotificationModal = openNotificationModal;
+        window.clearNotifications = clearNotifications;
+        window.openDayTitleModal = openDayTitleModal;
+        window.saveDayTitleAction = saveDayTitleAction;
         
         // 동기화 제어 핸들러 전역 바인딩
         window.createGroup = createGroup;
@@ -2018,6 +2170,8 @@
         populateSwapSelectors();
         updateTripClockInfo();
         setInterval(updateTripClockInfo, 60000);
+        updateFlightInfoUI();
+        setInterval(updateFlightInfoUI, 60000);
         renderHomeDayCard();
         setupHomeDaySwipe();
         setupItinerarySwipe();
