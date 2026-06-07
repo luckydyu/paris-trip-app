@@ -75,7 +75,7 @@
             <div class="flex justify-between items-center">
                 <div class="flex flex-col">
                     <div class="flex items-center space-x-2">
-                        <button onclick="switchTab('home')" class="text-lg font-bold tracking-tight hover:text-parisGold transition-colors text-left" aria-label="첫 화면으로 이동">
+                        <button onclick="switchTab('home')" class="text-lg font-bold tracking-tight text-white hover:text-white focus:text-white active:text-white transition-colors text-left" aria-label="첫 화면으로 이동">
                             Paris-Family 🗼
                         </button>
                         <span class="bg-slate-800 text-slate-300 text-[10px] px-1.5 py-0.5 rounded font-medium border border-slate-700/50">시차 -7시간</span>
@@ -151,7 +151,7 @@
                 <!-- 실시간 날씨 및 환율 API 위젯 -->
                 <div class="grid grid-cols-2 gap-3">
                     <!-- 기상청 정보 위젯 -->
-                    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
+                    <button onclick="openWeatherSource()" class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between text-left hover:border-amber-200 hover:bg-amber-50/30 transition" aria-label="파리 날씨 상세 출처 열기">
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-slate-500 font-semibold">파리 실시간 날씨</span>
                             <i id="weatherIcon" class="fa-solid fa-cloud-sun text-parisGold text-lg"></i>
@@ -160,7 +160,7 @@
                             <h3 id="weatherTemp" class="text-xl font-extrabold text-slate-800">로딩 중...</h3>
                             <p id="weatherDesc" class="text-[10px] text-slate-500 mt-1">실시간 날씨 정보 수신 중</p>
                         </div>
-                    </div>
+                    </button>
                     
                     <!-- 유럽중앙은행 실시간 환율 위젯 -->
                     <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
@@ -325,7 +325,7 @@
 
             <!-- ================= TAB 3: 여행 도구 (환율 및 발음 셔틀) ================= -->
             <section id="tab-tools" class="space-y-4 hidden">
-                <!-- 환율 및 메가 세일 헬퍼 계산기 -->
+                <!-- 환율 계산기 -->
                 <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-calculator text-emerald-500 mr-1.5"></i> 유로 ↔ 원화 스마트 계산기</h3>
@@ -350,15 +350,6 @@
                             </div>
                         </div>
                         
-                        <!-- 세일기간 할인 가이드 탭 -->
-                        <div class="bg-slate-50 p-3 rounded-lg border border-dashed border-slate-200 mt-2">
-                            <p class="text-xs font-bold text-parisGold mb-1"><i class="fa-solid fa-tag"></i> 6/26 여름 메가 세일(Soldes) 할인 즉시 계산</p>
-                            <div class="flex space-x-2">
-                                <button onclick="applyDiscount(20)" class="flex-1 bg-white border border-slate-200 py-1 rounded text-[11px] font-semibold text-slate-600 hover:bg-slate-50">20% 할인</button>
-                                <button onclick="applyDiscount(30)" class="flex-1 bg-white border border-slate-200 py-1 rounded text-[11px] font-semibold text-slate-600 hover:bg-slate-50">30% 할인</button>
-                                <button onclick="applyDiscount(50)" class="flex-1 bg-white border border-slate-200 py-1 rounded text-[11px] font-semibold text-slate-600 hover:bg-slate-50">50% 할인</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -1743,19 +1734,6 @@
             }
         }
 
-        // Soldes 메가세일 퍼센트 할인 헬퍼
-        function applyDiscount(percent) {
-            const eurVal = document.getElementById('eurInput');
-            if (!eurVal.value) return;
-            
-            const originalVal = parseFloat(eurVal.value);
-            const discounted = originalVal * (1 - (percent / 100));
-            
-            eurVal.value = discounted.toFixed(2);
-            convertCurrency('eur');
-            showToast(`여름 정기 세일 ${percent}% 인하 금액 적용!`);
-        }
-
         // Web Speech API 프랑스어 내장 스피커 가동
         function speakFrench(text) {
             if ('speechSynthesis' in window) {
@@ -1804,6 +1782,10 @@
             showToast("예약번호 바코드가 복사되었습니다! 오프라인 사용 가능");
         }
 
+        function openWeatherSource() {
+            window.open('https://open-meteo.com/en/docs?latitude=48.8566&longitude=2.3522&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FParis&forecast_days=1', '_blank', 'noopener');
+        }
+
         // 안심 오프라인 모드 토글 (현지 망 장애 대응 가상화)
         function toggleOfflineMode() {
             isOffline = !isOffline;
@@ -1838,12 +1820,12 @@
         window.showDay = showDay;
         window.saveDailyMemo = saveDailyMemo;
         window.convertCurrency = convertCurrency;
-        window.applyDiscount = applyDiscount;
         window.speakFrench = speakFrench;
         window.showTicket = showTicket;
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.alertCopyToast = alertCopyToast;
+        window.openWeatherSource = openWeatherSource;
         window.toggleOfflineMode = toggleOfflineMode;
         window.toggleRescheduleWizard = toggleRescheduleWizard;
         window.executeDaySwap = executeDaySwap;
