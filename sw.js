@@ -1,4 +1,4 @@
-const CACHE_NAME = 'paris-family-cache-v10';
+const CACHE_NAME = 'paris-family-cache-v11';
 const urlsToCache = [
   'index.html',
   'manifest.json',
