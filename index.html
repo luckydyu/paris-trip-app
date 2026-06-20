@@ -172,9 +172,14 @@
                         </div>
                         <div class="mt-2">
                             <h3 id="exchangeRateText" class="text-xl font-extrabold text-slate-800">로딩 중...</h3>
-                            <button onclick="switchTab('tools')" class="text-xs text-parisGold font-semibold mt-1 block hover:underline text-left">
-                                환율 계산기 이동 <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                            </button>
+                            <div class="flex items-center gap-2 mt-1">
+                                <button onclick="switchTab('tools')" class="text-xs text-parisGold font-semibold block hover:underline text-left">
+                                    계산기 <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                </button>
+                                <button onclick="openExchangeSource()" id="exchangeSourceButton" class="text-[10px] text-slate-400 font-bold hover:text-emerald-600">
+                                    출처
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -192,6 +197,18 @@
                         <div class="px-4 py-3 text-xs text-slate-500">여행 날짜별 날씨 예보 수신 중...</div>
                     </div>
                 </section>
+
+                <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <h3 class="font-bold text-slate-800"><i class="fa-solid fa-link text-indigo-500 mr-1.5"></i>주요 링크 허브</h3>
+                            <p class="text-[10px] text-slate-500 mt-1">지도 북마크, 공식 예약, 교통·생활 사이트를 한곳에서 검색</p>
+                        </div>
+                        <button onclick="switchTab('tools'); setLinkCategory('all')" class="shrink-0 bg-indigo-50 border border-indigo-100 text-indigo-700 px-3 py-2 rounded-lg text-xs font-extrabold hover:bg-indigo-100 transition">
+                            열기 <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- 개인 문서함 링크 (민감 자료는 Google Drive 권한 공유로 관리) -->
                 <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
@@ -312,11 +329,40 @@
 
             <!-- ================= TAB 3: 여행 도구 (환율 및 발음 셔틀) ================= -->
             <section id="tab-tools" class="space-y-4 hidden">
+                <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-link text-indigo-500 mr-1.5"></i>파리 주요 링크 허브</h3>
+                            <p class="text-xs text-slate-500 mt-1">장소, 예약, 교통, 생활 사이트를 검색해서 바로 엽니다.</p>
+                        </div>
+                        <span id="linkCountBadge" class="text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-full font-bold whitespace-nowrap">0개</span>
+                    </div>
+                    <div class="relative mb-3">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input id="linkSearchInput" type="search" oninput="renderLinkHub()" placeholder="예: 에펠, 호텔, 교통, 디즈니" class="w-full p-3 pl-9 rounded-lg border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-parisGold">
+                    </div>
+                    <div id="linkCategoryTabs" class="flex gap-1.5 overflow-x-auto pb-1 mb-3">
+                        <button data-link-category="all" onclick="setLinkCategory('all')" class="link-category-btn shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition">전체</button>
+                        <button data-link-category="places" onclick="setLinkCategory('places')" class="link-category-btn shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition">장소</button>
+                        <button data-link-category="booking" onclick="setLinkCategory('booking')" class="link-category-btn shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition">예약</button>
+                        <button data-link-category="transport" onclick="setLinkCategory('transport')" class="link-category-btn shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition">교통</button>
+                        <button data-link-category="daily" onclick="setLinkCategory('daily')" class="link-category-btn shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition">생활</button>
+                        <button data-link-category="docs" onclick="setLinkCategory('docs')" class="link-category-btn shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition">문서</button>
+                        <button data-link-category="custom" onclick="setLinkCategory('custom')" class="link-category-btn shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition">내 링크</button>
+                    </div>
+                    <div id="linkHubList" class="space-y-2 max-h-[28rem] overflow-y-auto pr-1">
+                        <div class="rounded-lg bg-slate-50 border border-slate-100 px-3 py-3 text-xs text-slate-500">주요 링크를 불러오는 중...</div>
+                    </div>
+                    <button onclick="openCustomLinkModal()" class="w-full mt-3 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/60 px-3 py-2.5 text-xs font-extrabold text-indigo-700 hover:bg-indigo-100/70 transition">
+                        <i class="fa-solid fa-plus mr-1.5"></i>링크 추가
+                    </button>
+                </div>
+
                 <!-- 환율 계산기 -->
                 <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="font-bold text-slate-800 text-sm"><i class="fa-solid fa-calculator text-emerald-500 mr-1.5"></i> 유로 ↔ 원화 스마트 계산기</h3>
-                        <span id="rateLabel" class="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-semibold">환율 정보 조회 중...</span>
+                        <button onclick="openExchangeSource()" id="rateLabel" class="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-semibold hover:bg-emerald-100 transition">환율 정보 조회 중...</button>
                     </div>
                     <div class="space-y-3">
                         <div>
@@ -504,6 +550,49 @@
 
         <!-- ================= MODALS & POPUPS ================= -->
         
+        <div id="customLinkModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100">
+                <div class="bg-parisBlue text-white p-4 flex justify-between items-center">
+                    <h3 class="font-bold text-sm flex items-center"><i class="fa-solid fa-link text-parisGold mr-2"></i>내 링크 추가</h3>
+                    <button onclick="closeCustomLinkModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div class="p-5 space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-500 mb-1">링크 이름</label>
+                        <input id="customLinkTitle" type="text" placeholder="예: 맛집 후보 지도" class="w-full p-3 rounded-lg border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-parisGold">
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-[11px] font-bold text-slate-500">URL</label>
+                            <button onclick="prefillCustomLinkUrlFromClipboard()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800">클립보드 확인</button>
+                        </div>
+                        <input id="customLinkUrl" type="url" placeholder="https://..." class="w-full p-3 rounded-lg border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-parisGold">
+                        <p id="customLinkClipboardHint" class="text-[10px] text-slate-400 mt-1">URL이 클립보드에 있으면 자동 입력을 시도합니다.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">분류</label>
+                            <select id="customLinkCategory" class="w-full p-3 rounded-lg border border-slate-200 text-xs font-semibold bg-white focus:outline-none focus:ring-1 focus:ring-parisGold">
+                                <option value="places">장소</option>
+                                <option value="booking">예약</option>
+                                <option value="transport">교통</option>
+                                <option value="daily">생활</option>
+                                <option value="docs">문서</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-500 mb-1">설명</label>
+                            <input id="customLinkDesc" type="text" placeholder="선택" class="w-full p-3 rounded-lg border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-parisGold">
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-50 border-t border-slate-100 flex gap-2">
+                    <button onclick="closeCustomLinkModal()" class="flex-1 bg-white border border-slate-200 py-2 rounded-lg text-xs font-semibold text-slate-600">취소</button>
+                    <button onclick="saveCustomLink()" class="flex-1 bg-parisBlue text-white py-2 rounded-lg font-bold text-xs">추가</button>
+                </div>
+            </div>
+        </div>
+
         <!-- 실시간 공유 및 동기화 설정 전용 팝업 (완벽 분리) -->
         <div id="syncSettingsModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100">
@@ -836,6 +925,59 @@
         let itineraryData = {};
 
         const personalDocsUrl = 'https://drive.google.com/drive/folders/1NHYBvJrWM3MtPQsD1El8m39CAVow1I6i?usp=sharing';
+        let activeLinkCategory = 'all';
+        let customLinkItems = [];
+        const customLinksStorageKey = 'parisTripCustomLinks';
+        let exchangeRateSourceUrl = 'https://www.frankfurter.app/';
+        let exchangeRateSourceName = 'Frankfurter';
+
+        const linkCategoryMeta = {
+            docs: { label: '문서', icon: 'fa-folder-open', color: 'text-blue-500' },
+            places: { label: '장소', icon: 'fa-map-location-dot', color: 'text-emerald-500' },
+            booking: { label: '예약', icon: 'fa-ticket', color: 'text-parisGold' },
+            transport: { label: '교통', icon: 'fa-train-subway', color: 'text-indigo-500' },
+            daily: { label: '생활', icon: 'fa-circle-info', color: 'text-slate-500' }
+        };
+
+        const linkHubItems = [
+            { category: 'docs', title: '개인 문서함', desc: '호텔 바우처, 티켓 원본, 예약 문서', url: personalDocsUrl, tags: 'drive 문서 바우처 티켓 예약 항공권 호텔' },
+
+            { category: 'places', title: 'Aparthotel Adagio Paris Centre Tour Eiffel', desc: '숙소 지도', url: 'https://maps.app.goo.gl/7cuv4mn8tyWr6vbP7', tags: '호텔 숙소 adagio 에펠탑' },
+            { category: 'places', title: '몽생미셸 수도원', desc: 'Google Maps', url: 'https://maps.app.goo.gl/2HRMJdqUS9UT19Rs7', tags: '몽생미셸 수도원 abbey' },
+            { category: 'places', title: '오베르쉬르우아즈', desc: 'Google Maps', url: 'https://maps.app.goo.gl/M3CPPDw8hPycKQ1h7', tags: '오베르쉬르우아즈 auvers sur oise 고흐' },
+            { category: 'places', title: '쥐베흐니', desc: 'Google Maps', url: 'https://maps.app.goo.gl/UhrXhavnV5g4Tn4f8', tags: '지베르니 쥐베흐니 giverny 모네' },
+            { category: 'places', title: '팡테옹', desc: 'Google Maps', url: 'https://maps.app.goo.gl/R2txGD3cp2m7C4gV6', tags: '팡테옹 pantheon' },
+            { category: 'places', title: '국립 자연사 박물관', desc: 'Google Maps', url: 'https://maps.app.goo.gl/Pxdo3BFGi6rBhhdZ6', tags: '자연사 박물관 museum histoire naturelle' },
+            { category: 'places', title: '디즈니랜드 파리', desc: 'Google Maps', url: 'https://maps.app.goo.gl/npySb3iixwR45pZT9', tags: '디즈니 disneyland paris' },
+            { category: 'places', title: 'Parc zoologique de Paris', desc: 'Google Maps', url: 'https://maps.app.goo.gl/4sYG5qhQMHcZsyLs7', tags: '동물원 zoo zoologique' },
+            { category: 'places', title: 'Aquaboulevard', desc: 'Google Maps', url: 'https://maps.app.goo.gl/kD24sHqTGSDW9QY37', tags: '아쿠아불바르 aquaboulevard 수영 워터파크' },
+            { category: 'places', title: 'Les Canards de Paris', desc: 'Google Maps', url: 'https://maps.app.goo.gl/CjrEFXfyT25bmuib7', tags: '수륙양용 canards duck tour' },
+            { category: 'places', title: "Jardin d'Acclimatation", desc: 'Google Maps', url: 'https://maps.app.goo.gl/23z3aormrCcHSsm87', tags: '정원 놀이공원 acclimatation' },
+            { category: 'places', title: '뤽상부르 공원', desc: 'Google Maps', url: 'https://maps.app.goo.gl/uRKqLU1HzBEvKteY7', tags: '뤽상부르 공원 luxembourg' },
+            { category: 'places', title: '파리 식물원', desc: 'Google Maps', url: 'https://maps.app.goo.gl/km3nTHc4SVeuxkbJ6', tags: '식물원 jardin plantes' },
+            { category: 'places', title: "Cité des Sciences et de l'Industrie", desc: 'Google Maps', url: 'https://maps.app.goo.gl/rLAE7HmeRoy9oQwc6', tags: '과학관 cite sciences industrie' },
+
+            { category: 'booking', title: '에펠탑 공식 예약', desc: '공식 티켓 예매', url: 'https://ticket.toureiffel.paris/en', tags: '에펠탑 eiffel tower ticket 예약' },
+            { category: 'booking', title: '루브르 공식 티켓', desc: '공식 예약 페이지', url: 'https://ticket.louvre.fr/en', tags: '루브르 louvre museum ticket 예약' },
+            { category: 'booking', title: '오르세 공식 티켓', desc: '공식 예약 페이지', url: 'https://billetterie.musee-orsay.fr/en-GB/home', tags: '오르세 orsay museum ticket 예약' },
+            { category: 'booking', title: '베르사유 공식 티켓', desc: '공식 예약 페이지', url: 'https://ticket.chateauversailles.fr/en', tags: '베르사유 versailles ticket 예약' },
+            { category: 'booking', title: '디즈니랜드 파리 공식 티켓', desc: '공식 티켓 구매', url: 'https://tickets.disneylandparis.com/en-usd', tags: '디즈니 disneyland ticket 예약' },
+            { category: 'booking', title: '파리 뮤지엄 패스', desc: '공식 패스 사이트', url: 'https://www.parismuseumpass.fr/t-en', tags: '뮤지엄패스 museum pass 티켓' },
+            { category: 'booking', title: '몽생미셸 수도원 공식 안내', desc: '방문 준비 및 티켓 안내', url: 'https://www.abbaye-mont-saint-michel.fr/en/prepare-your-visit', tags: '몽생미셸 수도원 공식 예약' },
+            { category: 'booking', title: '모네 정원 지베르니', desc: 'Fondation Monet 방문 안내', url: 'https://fondation-monet.com/en/visit/', tags: '모네 정원 지베르니 giverny ticket' },
+
+            { category: 'transport', title: 'Île-de-France Mobilités', desc: '파리 교통권·노선 공식 안내', url: 'https://www.iledefrance-mobilites.fr/en', tags: '교통 지하철 rer 버스 navigo' },
+            { category: 'transport', title: 'RATP', desc: '메트로·버스 경로 검색', url: 'https://www.ratp.fr/en', tags: 'ratp metro bus route 교통' },
+            { category: 'transport', title: 'Paris Aéroport', desc: 'CDG/ORY 공항 공식 정보', url: 'https://www.parisaeroport.fr/en', tags: '공항 cdg orly flight airport' },
+            { category: 'transport', title: 'SNCF Connect', desc: '프랑스 기차 예약·조회', url: 'https://www.sncf-connect.com/en-en/', tags: '기차 sncf train 예약' },
+
+            { category: 'daily', title: 'Paris je t’aime', desc: '파리 공식 관광 정보', url: 'https://parisjetaime.com/eng/', tags: '관광 공식 정보 paris tourism' },
+            { category: 'daily', title: '파리 14일 날씨', desc: 'timeanddate 상세 예보', url: 'https://www.timeanddate.com/weather/france/paris/ext', tags: '날씨 weather forecast' },
+            { category: 'daily', title: '주변 화장실 찾기', desc: 'Google Maps 검색', url: 'https://www.google.com/maps/search/public+toilets+near+Paris', tags: '화장실 toilet restroom' },
+            { category: 'daily', title: '주변 약국 찾기', desc: 'Google Maps 검색', url: 'https://www.google.com/maps/search/pharmacy+near+Paris', tags: '약국 pharmacy pharmacie' },
+            { category: 'daily', title: '주변 놀이터 찾기', desc: 'Google Maps 검색', url: 'https://www.google.com/maps/search/playground+near+Paris', tags: '놀이터 playground 아이' },
+            { category: 'daily', title: '주프랑스 대한민국 대사관', desc: '영사·긴급 공지 확인', url: 'https://overseas.mofa.go.kr/fr-ko/index.do', tags: '대사관 영사 긴급 여권' }
+        ];
 
         const tripWeatherDates = [
             { date: '2026-06-27', label: '6/27 토', title: '1일차' },
@@ -865,6 +1007,221 @@
             return compactDate
                 ? `https://www.timeanddate.com/weather/france/paris/hourly?hd=${compactDate}`
                 : 'https://www.timeanddate.com/weather/france/paris/ext';
+        }
+
+        function openExchangeSource() {
+            window.open(exchangeRateSourceUrl, '_blank', 'noopener');
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            })[char]);
+        }
+
+        function escapeJsArg(value) {
+            return escapeHtml(JSON.stringify(String(value ?? '')));
+        }
+
+        function normalizeLinkUrl(rawUrl) {
+            const trimmedUrl = String(rawUrl || '').trim();
+            if (!trimmedUrl) return '';
+            const candidateUrl = /^https?:\/\//i.test(trimmedUrl) ? trimmedUrl : `https://${trimmedUrl}`;
+            try {
+                const parsedUrl = new URL(candidateUrl);
+                if (!['http:', 'https:'].includes(parsedUrl.protocol)) return '';
+                return parsedUrl.href;
+            } catch (err) {
+                return '';
+            }
+        }
+
+        function loadCustomLinks() {
+            try {
+                const savedLinks = JSON.parse(localStorage.getItem(customLinksStorageKey) || '[]');
+                if (!Array.isArray(savedLinks)) return;
+                customLinkItems = savedLinks
+                    .filter(item => item?.title && item?.url)
+                    .map(item => ({
+                        id: item.id || `custom-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+                        category: linkCategoryMeta[item.category] ? item.category : 'daily',
+                        title: String(item.title).slice(0, 80),
+                        desc: String(item.desc || '직접 추가한 링크').slice(0, 120),
+                        url: normalizeLinkUrl(item.url),
+                        tags: String(item.tags || item.desc || item.title || '').slice(0, 180),
+                        isCustom: true
+                    }))
+                    .filter(item => item.url);
+            } catch (err) {
+                customLinkItems = [];
+            }
+        }
+
+        function saveCustomLinks() {
+            try {
+                localStorage.setItem(customLinksStorageKey, JSON.stringify(customLinkItems.map(({ id, category, title, desc, url, tags }) => ({
+                    id,
+                    category,
+                    title,
+                    desc,
+                    url,
+                    tags
+                }))));
+            } catch (err) {
+                showToast('링크 저장 공간을 사용할 수 없습니다.');
+            }
+        }
+
+        function updateCustomLinkClipboardHint(message, tone = 'muted') {
+            const hintEl = document.getElementById('customLinkClipboardHint');
+            if (!hintEl) return;
+            const toneClass = tone === 'success' ? 'text-emerald-600' : tone === 'warning' ? 'text-amber-600' : 'text-slate-400';
+            hintEl.className = `text-[10px] mt-1 ${toneClass}`;
+            hintEl.innerText = message;
+        }
+
+        async function prefillCustomLinkUrlFromClipboard() {
+            const urlInput = document.getElementById('customLinkUrl');
+            if (!urlInput || !navigator.clipboard?.readText) {
+                updateCustomLinkClipboardHint('클립보드 자동 확인을 지원하지 않는 환경입니다.', 'warning');
+                return;
+            }
+
+            try {
+                const clipboardText = await navigator.clipboard.readText();
+                const clipboardUrl = normalizeLinkUrl(clipboardText);
+                if (clipboardUrl) {
+                    urlInput.value = clipboardUrl;
+                    updateCustomLinkClipboardHint('클립보드의 URL을 자동으로 넣었습니다.', 'success');
+                } else {
+                    updateCustomLinkClipboardHint('클립보드에 URL 형식의 텍스트가 없습니다.', 'warning');
+                }
+            } catch (err) {
+                updateCustomLinkClipboardHint('클립보드 권한이 없어 직접 붙여넣어 주세요.', 'warning');
+            }
+        }
+
+        async function openCustomLinkModal() {
+            const modal = document.getElementById('customLinkModal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            updateCustomLinkClipboardHint('URL이 클립보드에 있으면 자동 입력을 시도합니다.');
+            await prefillCustomLinkUrlFromClipboard();
+            setTimeout(() => {
+                const titleInput = document.getElementById('customLinkTitle');
+                const urlInput = document.getElementById('customLinkUrl');
+                (urlInput?.value ? titleInput : urlInput)?.focus();
+            }, 0);
+        }
+
+        function closeCustomLinkModal() {
+            document.getElementById('customLinkModal')?.classList.add('hidden');
+        }
+
+        function saveCustomLink() {
+            const titleInput = document.getElementById('customLinkTitle');
+            const urlInput = document.getElementById('customLinkUrl');
+            const descInput = document.getElementById('customLinkDesc');
+            const categoryInput = document.getElementById('customLinkCategory');
+            const title = titleInput?.value.trim();
+            const url = normalizeLinkUrl(urlInput?.value);
+
+            if (!title || !url) {
+                showToast('링크 이름과 올바른 URL을 입력해 주세요.');
+                return;
+            }
+
+            const desc = descInput?.value.trim() || '직접 추가한 링크';
+            customLinkItems.unshift({
+                id: `custom-${Date.now()}`,
+                category: categoryInput?.value || 'daily',
+                title,
+                desc,
+                url,
+                tags: `${title} ${desc}`,
+                isCustom: true
+            });
+
+            saveCustomLinks();
+            if (titleInput) titleInput.value = '';
+            if (urlInput) urlInput.value = '';
+            if (descInput) descInput.value = '';
+            activeLinkCategory = 'custom';
+            renderLinkHub();
+            closeCustomLinkModal();
+            showToast('내 링크에 추가했습니다.');
+        }
+
+        function deleteCustomLink(id) {
+            customLinkItems = customLinkItems.filter(item => item.id !== id);
+            saveCustomLinks();
+            renderLinkHub();
+            showToast('내 링크에서 삭제했습니다.');
+        }
+
+        function setLinkCategory(category) {
+            activeLinkCategory = category;
+            renderLinkHub();
+        }
+
+        function renderLinkHub() {
+            const listEl = document.getElementById('linkHubList');
+            if (!listEl) return;
+
+            const searchInput = document.getElementById('linkSearchInput');
+            const query = (searchInput?.value || '').trim().toLowerCase();
+            const allLinkItems = [...customLinkItems, ...linkHubItems];
+            const filteredLinks = allLinkItems.filter(item => {
+                const categoryMatches = activeLinkCategory === 'all' || (activeLinkCategory === 'custom' ? item.isCustom : item.category === activeLinkCategory);
+                const searchText = `${item.title} ${item.desc} ${item.tags || ''}`.toLowerCase();
+                return categoryMatches && (!query || searchText.includes(query));
+            });
+
+            document.querySelectorAll('.link-category-btn').forEach(btn => {
+                const isActive = btn.dataset.linkCategory === activeLinkCategory;
+                btn.className = `link-category-btn shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold border transition ${isActive ? 'bg-parisBlue text-white border-parisBlue' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}`;
+            });
+
+            const countBadge = document.getElementById('linkCountBadge');
+            if (countBadge) countBadge.innerText = `${filteredLinks.length}개`;
+
+            if (!filteredLinks.length) {
+                listEl.innerHTML = '<div class="rounded-lg bg-slate-50 border border-slate-100 px-3 py-4 text-xs text-slate-500 text-center">검색 결과가 없습니다.</div>';
+                return;
+            }
+
+            listEl.innerHTML = filteredLinks.map(item => {
+                const meta = linkCategoryMeta[item.category] || linkCategoryMeta.daily;
+                const deleteButton = item.isCustom ? `
+                    <button onclick="deleteCustomLink(${escapeJsArg(item.id)})" class="w-8 h-8 rounded-lg border border-red-100 bg-white text-red-500 hover:bg-red-50 transition shrink-0" aria-label="${escapeHtml(item.title)} 삭제">
+                        <i class="fa-solid fa-trash-can text-[11px]"></i>
+                    </button>
+                ` : '';
+                return `
+                    <div class="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5 hover:bg-white hover:border-amber-200 transition">
+                        <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" class="flex items-center justify-between gap-3 min-w-0 flex-1" aria-label="${escapeHtml(item.title)} 열기">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-8 h-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid ${meta.icon} ${meta.color} text-sm"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-extrabold text-slate-800 truncate">${escapeHtml(item.title)}</p>
+                                    <p class="text-[10px] text-slate-500 mt-0.5 truncate">${escapeHtml(item.desc)}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-[10px] font-bold text-slate-400">${item.isCustom ? '내 링크' : meta.label}</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-parisGold"></i>
+                            </div>
+                        </a>
+                        ${deleteButton}
+                    </div>
+                `;
+            }).join('');
         }
 
         function renderTripWeatherForecast(daily) {
@@ -1666,20 +2023,31 @@
             try {
                 const exchangeSources = [
                     {
+                        name: 'Frankfurter',
                         url: 'https://api.frankfurter.app/latest?from=EUR&to=KRW',
-                        parse: data => data?.rates?.KRW
+                        sourceUrl: 'https://www.frankfurter.app/',
+                        parse: data => data?.rates?.KRW,
+                        parseDate: data => data?.date
                     },
                     {
+                        name: 'Frankfurter mirror',
                         url: 'https://api.frankfurter.dev/v2/rate/EUR/KRW',
-                        parse: data => data?.rate
+                        sourceUrl: 'https://www.frankfurter.dev/',
+                        parse: data => data?.rate,
+                        parseDate: data => data?.date || data?.updatedAt
                     },
                     {
+                        name: 'ExchangeRate-API',
                         url: 'https://open.er-api.com/v6/latest/EUR',
-                        parse: data => data?.rates?.KRW
+                        sourceUrl: 'https://www.exchangerate-api.com/docs/free',
+                        parse: data => data?.rates?.KRW,
+                        parseDate: data => data?.time_last_update_utc
                     }
                 ];
 
                 let liveRate = null;
+                let liveSource = null;
+                let liveDate = '';
                 for (const source of exchangeSources) {
                     try {
                         const response = await fetch(source.url);
@@ -1688,6 +2056,8 @@
                         const parsedRate = Number(source.parse(data));
                         if (Number.isFinite(parsedRate) && parsedRate > 1000) {
                             liveRate = parsedRate;
+                            liveSource = source;
+                            liveDate = source.parseDate(data) || '';
                             break;
                         }
                     } catch (sourceErr) {
@@ -1698,10 +2068,15 @@
                 if (!liveRate) throw new Error('No exchange source available');
 
                 rate = liveRate;
+                exchangeRateSourceUrl = liveSource?.sourceUrl || exchangeRateSourceUrl;
+                exchangeRateSourceName = liveSource?.name || exchangeRateSourceName;
+                const dateLabel = liveDate ? ` · ${String(liveDate).slice(0, 10)}` : '';
                 document.getElementById('exchangeRateText').innerText = `1€ = ${Math.round(rate).toLocaleString()}원`;
-                document.getElementById('rateLabel').innerText = `실시간: 1€ = ${rate.toFixed(1)}원`;
+                document.getElementById('rateLabel').innerText = `${exchangeRateSourceName}${dateLabel}: 1€ = ${rate.toFixed(1)}원`;
             } catch (err) {
                 rate = 1796.0;
+                exchangeRateSourceUrl = 'https://www.frankfurter.app/';
+                exchangeRateSourceName = '기준값';
                 document.getElementById('exchangeRateText').innerText = `1€ = ${Math.round(rate).toLocaleString()}원`;
                 document.getElementById('rateLabel').innerText = `환율 서버 점검 (여행용 기준값 적용)`;
             }
@@ -2123,7 +2498,10 @@
                 
                 showToast('로컬 오프라인 모드: 외부 API 전송 대기를 정지하고 보존된 오프라인 캐시 일정만 신속히 표출합니다.');
                 
+                exchangeRateSourceUrl = 'https://www.frankfurter.app/';
+                exchangeRateSourceName = '오프라인 기준값';
                 document.getElementById('exchangeRateText').innerText = `1€ = 1,796원 (오프라인)`;
+                document.getElementById('rateLabel').innerText = `오프라인 기준값: 1€ = 1,796원`;
                 document.getElementById('weatherTemp').innerText = `현재 26°C`;
                 document.getElementById('weatherDesc').innerText = `맑음 • 오프라인 기준 최고 26°C · 최저 15°C`;
                 renderOfflineTripWeatherForecast();
@@ -2148,6 +2526,13 @@
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.openWeatherSource = openWeatherSource;
+        window.setLinkCategory = setLinkCategory;
+        window.renderLinkHub = renderLinkHub;
+        window.openCustomLinkModal = openCustomLinkModal;
+        window.closeCustomLinkModal = closeCustomLinkModal;
+        window.prefillCustomLinkUrlFromClipboard = prefillCustomLinkUrlFromClipboard;
+        window.saveCustomLink = saveCustomLink;
+        window.deleteCustomLink = deleteCustomLink;
         window.toggleOfflineMode = toggleOfflineMode;
         window.toggleRescheduleWizard = toggleRescheduleWizard;
         window.executeDaySwap = executeDaySwap;
@@ -2180,6 +2565,8 @@
         updateFlightInfoUI();
         setInterval(updateFlightInfoUI, 60000);
         renderHomeDayCard();
+        loadCustomLinks();
+        renderLinkHub();
         setupHomeDaySwipe();
         setupItinerarySwipe();
         showDay(activeDayNum);
