@@ -603,11 +603,11 @@
                         <p id="exchangeModalRate" class="text-lg font-extrabold text-slate-900">1€ = --원</p>
                         <p id="exchangeModalSource" class="text-[11px] text-emerald-700 font-bold mt-1">출처 확인 중</p>
                     </div>
-                    <p class="leading-relaxed">앱은 Frankfurter를 우선 조회하고, 연결이 어려우면 미러 또는 대체 공개 환율 API를 사용합니다. 표시값은 결제 시 카드사·환전 수수료와 다를 수 있습니다.</p>
+                    <p class="leading-relaxed">앱은 ECB 기준 환율을 제공하는 공개 API를 통해 값을 가져오며, 출처 링크는 실제 기준값을 확인할 수 있는 유럽중앙은행(ECB) 환율 고시 페이지로 연결됩니다. ECB 페이지에서 Korean won(KRW) 행을 확인하세요. 실제 결제 환율은 카드사·환전 수수료와 다를 수 있습니다.</p>
                 </div>
                 <div class="p-3 bg-slate-50 border-t border-slate-100 flex gap-2">
                     <button onclick="closeExchangeSourceModal()" class="flex-1 bg-white border border-slate-200 py-2 rounded-lg text-xs font-semibold text-slate-600">닫기</button>
-                    <button onclick="openExchangeSourceWebsite()" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs">출처 사이트 열기</button>
+                    <button onclick="openExchangeSourceWebsite()" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs">ECB 기준값 열기</button>
                 </div>
             </div>
         </div>
@@ -947,8 +947,9 @@
         let activeLinkCategory = 'all';
         let customLinkItems = [];
         const customLinksStorageKey = 'parisTripCustomLinks';
-        let exchangeRateSourceUrl = 'https://www.frankfurter.app/';
-        let exchangeRateSourceName = 'Frankfurter';
+        const ecbExchangeRatesUrl = 'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html';
+        let exchangeRateSourceUrl = ecbExchangeRatesUrl;
+        let exchangeRateSourceName = 'ECB 기준 환율';
         let exchangeRateSourceDate = '';
         let exchangeRateDisplayValue = '';
 
@@ -2060,25 +2061,18 @@
             try {
                 const exchangeSources = [
                     {
-                        name: 'Frankfurter',
-                        url: 'https://api.frankfurter.app/latest?from=EUR&to=KRW',
-                        sourceUrl: 'https://www.frankfurter.app/',
-                        parse: data => data?.rates?.KRW,
-                        parseDate: data => data?.date
-                    },
-                    {
-                        name: 'Frankfurter mirror',
-                        url: 'https://api.frankfurter.dev/v2/rate/EUR/KRW',
-                        sourceUrl: 'https://www.frankfurter.dev/',
+                        name: 'ECB 기준 환율',
+                        url: 'https://api.frankfurter.dev/v2/rate/EUR/KRW?providers=ECB',
+                        sourceUrl: ecbExchangeRatesUrl,
                         parse: data => data?.rate,
                         parseDate: data => data?.date || data?.updatedAt
                     },
                     {
-                        name: 'ExchangeRate-API',
-                        url: 'https://open.er-api.com/v6/latest/EUR',
-                        sourceUrl: 'https://www.exchangerate-api.com/docs/free',
+                        name: 'ECB 기준 환율',
+                        url: 'https://api.frankfurter.app/latest?from=EUR&to=KRW',
+                        sourceUrl: ecbExchangeRatesUrl,
                         parse: data => data?.rates?.KRW,
-                        parseDate: data => data?.time_last_update_utc
+                        parseDate: data => data?.date
                     }
                 ];
 
@@ -2114,8 +2108,8 @@
                 document.getElementById('rateLabel').innerText = `${exchangeRateSourceName}${dateLabel}: 1€ = ${rate.toFixed(1)}원`;
             } catch (err) {
                 rate = 1796.0;
-                exchangeRateSourceUrl = 'https://www.frankfurter.app/';
-                exchangeRateSourceName = '기준값';
+                exchangeRateSourceUrl = ecbExchangeRatesUrl;
+                exchangeRateSourceName = 'ECB 기준값 확인 필요';
                 exchangeRateSourceDate = '';
                 exchangeRateDisplayValue = `1€ = ${Math.round(rate).toLocaleString()}원`;
                 document.getElementById('exchangeRateText').innerText = exchangeRateDisplayValue;
@@ -2539,7 +2533,7 @@
                 
                 showToast('로컬 오프라인 모드: 외부 API 전송 대기를 정지하고 보존된 오프라인 캐시 일정만 신속히 표출합니다.');
                 
-                exchangeRateSourceUrl = 'https://www.frankfurter.app/';
+                exchangeRateSourceUrl = ecbExchangeRatesUrl;
                 exchangeRateSourceName = '오프라인 기준값';
                 exchangeRateSourceDate = '';
                 exchangeRateDisplayValue = `1€ = 1,796원 (오프라인)`;
