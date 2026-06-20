@@ -179,6 +179,18 @@
                     </div>
                 </div>
 
+                <section class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden" aria-labelledby="tripWeatherTitle">
+                    <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                        <h3 id="tripWeatherTitle" class="font-bold text-slate-800 text-sm">
+                            <i class="fa-solid fa-calendar-days text-parisGold mr-1.5"></i>여행 기간 파리 예보
+                        </h3>
+                        <span id="tripWeatherSourceLabel" class="text-[10px] text-slate-400 font-semibold">Open-Meteo · °C</span>
+                    </div>
+                    <div id="tripWeatherForecast" class="divide-y divide-slate-100">
+                        <div class="px-4 py-3 text-xs text-slate-500">여행 날짜별 날씨 예보 수신 중...</div>
+                    </div>
+                </section>
+
                 <!-- 빠른 입장 보관함 (가족 4인 QR 전면배치) -->
                 <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
                     <div class="flex justify-between items-center mb-3">
@@ -877,6 +889,88 @@
         };
 
         let itineraryData = {};
+
+        const tripWeatherDates = [
+            { date: '2026-06-27', label: '6/27 토', title: '1일차' },
+            { date: '2026-06-28', label: '6/28 일', title: '2일차' },
+            { date: '2026-06-29', label: '6/29 월', title: '3일차' },
+            { date: '2026-06-30', label: '6/30 화', title: '4일차' },
+            { date: '2026-07-01', label: '7/1 수', title: '5일차' },
+            { date: '2026-07-02', label: '7/2 목', title: '6일차' },
+            { date: '2026-07-03', label: '7/3 금', title: '7일차' },
+            { date: '2026-07-04', label: '7/4 토', title: '8일차' }
+        ];
+
+        function getWeatherMeta(code) {
+            if (code === 0) return { desc: '맑음', iconClass: 'fa-sun text-amber-500' };
+            if (code >= 1 && code <= 3) return { desc: '구름 조금', iconClass: 'fa-cloud-sun text-parisGold' };
+            if (code >= 45 && code <= 48) return { desc: '안개 자욱', iconClass: 'fa-smog text-slate-400' };
+            if (code >= 51 && code <= 67) return { desc: '비 예정', iconClass: 'fa-cloud-showers-heavy text-blue-400' };
+            if (code >= 71 && code <= 77) return { desc: '눈', iconClass: 'fa-snowflake text-sky-300' };
+            if (code >= 80 && code <= 82) return { desc: '소나기', iconClass: 'fa-cloud-showers-heavy text-blue-400' };
+            if (code >= 85 && code <= 86) return { desc: '눈', iconClass: 'fa-snowflake text-sky-300' };
+            if (code >= 95) return { desc: '뇌우 및 천둥', iconClass: 'fa-cloud-bolt text-yellow-500' };
+            return { desc: '날씨 확인 중', iconClass: 'fa-cloud-sun text-parisGold' };
+        }
+
+        function renderTripWeatherForecast(daily) {
+            const forecastEl = document.getElementById('tripWeatherForecast');
+            if (!forecastEl || !daily?.time?.length) return;
+
+            const rows = tripWeatherDates.map(day => {
+                const index = daily.time.indexOf(day.date);
+                if (index === -1) {
+                    return `
+                        <div class="px-4 py-3 flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-xs font-extrabold text-slate-800">${day.label} <span class="text-[10px] text-slate-400 font-semibold">${day.title}</span></p>
+                                <p class="text-[10px] text-slate-500 mt-0.5">예보 제공 범위 밖</p>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-semibold whitespace-nowrap">대기 중</span>
+                        </div>
+                    `;
+                }
+
+                const maxTemp = Math.round(daily.temperature_2m_max[index]);
+                const minTemp = Math.round(daily.temperature_2m_min[index]);
+                const rainChance = daily.precipitation_probability_max?.[index];
+                const meta = getWeatherMeta(daily.weather_code?.[index]);
+                const rainLabel = Number.isFinite(rainChance) ? `강수 ${rainChance}%` : '강수 정보 없음';
+
+                return `
+                    <div class="px-4 py-3 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <i class="fa-solid ${meta.iconClass} w-5 text-center"></i>
+                            <div class="min-w-0">
+                                <p class="text-xs font-extrabold text-slate-800">${day.label} <span class="text-[10px] text-slate-400 font-semibold">${day.title}</span></p>
+                                <p class="text-[10px] text-slate-500 mt-0.5">${meta.desc} · ${rainLabel}</p>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <p class="text-xs font-extrabold text-slate-800">최고 ${maxTemp}°C</p>
+                            <p class="text-[10px] font-semibold text-slate-500">최저 ${minTemp}°C</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            forecastEl.innerHTML = rows;
+        }
+
+        function renderOfflineTripWeatherForecast() {
+            const forecastEl = document.getElementById('tripWeatherForecast');
+            if (!forecastEl) return;
+
+            forecastEl.innerHTML = tripWeatherDates.map(day => `
+                <div class="px-4 py-3 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="text-xs font-extrabold text-slate-800">${day.label} <span class="text-[10px] text-slate-400 font-semibold">${day.title}</span></p>
+                        <p class="text-[10px] text-slate-500 mt-0.5">온라인 연결 시 예보 갱신</p>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-semibold whitespace-nowrap">오프라인</span>
+                </div>
+            `).join('');
+        }
 
         // 1. Firebase 통합 연동 (규칙 1, 2, 3 완벽 준수)
         async function setupFirebaseSync() {
@@ -1651,43 +1745,29 @@
 
             // 2. Open-Meteo 실시간 파리 좌표 날씨 수신
             try {
-                const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FParis&forecast_days=1';
+                const weatherUrl = 'https://api.open-meteo.com/v1/forecast?latitude=48.8566&longitude=2.3522&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FParis&forecast_days=16';
                 const response = await fetch(weatherUrl);
                 if (response.ok) {
                     const data = await response.json();
                     const currentTemp = Math.round(data.current.temperature_2m);
-                    const maxTemp = Math.round(data.daily.temperature_2m_max[0]);
-                    const minTemp = Math.round(data.daily.temperature_2m_min[0]);
+                    const todayIndex = data.daily.time.indexOf(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(new Date()));
+                    const fallbackTodayIndex = todayIndex >= 0 ? todayIndex : 0;
+                    const maxTemp = Math.round(data.daily.temperature_2m_max[fallbackTodayIndex]);
+                    const minTemp = Math.round(data.daily.temperature_2m_min[fallbackTodayIndex]);
                     const code = data.current.weather_code;
+                    const { desc, iconClass } = getWeatherMeta(code);
 
-                    let desc = "맑음";
-                    let iconClass = "fa-sun text-amber-500";
-                    if (code >= 1 && code <= 3) {
-                        desc = "구름 조금";
-                        iconClass = "fa-cloud-sun text-parisGold";
-                    } else if (code >= 45 && code <= 48) {
-                        desc = "안개 자욱";
-                        iconClass = "fa-smog text-slate-400";
-                    } else if (code >= 51 && code <= 67) {
-                        desc = "비 예정";
-                        iconClass = "fa-cloud-showers-heavy text-blue-400";
-                    } else if (code >= 71 && code <= 86) {
-                        desc = "눈";
-                        iconClass = "fa-snowflake text-sky-300";
-                    } else if (code >= 95) {
-                        desc = "뇌우 및 천둥";
-                        iconClass = "fa-cloud-bolt text-yellow-500";
-                    }
-
-                    document.getElementById('weatherTemp').innerText = `${currentTemp}°C (${maxTemp}°/${minTemp}°)`;
-                    document.getElementById('weatherDesc').innerText = `${desc} • 실시간 파리 기상`;
+                    document.getElementById('weatherTemp').innerText = `현재 ${currentTemp}°C`;
+                    document.getElementById('weatherDesc').innerText = `${desc} • 오늘 최고 ${maxTemp}°C · 최저 ${minTemp}°C`;
                     document.getElementById('weatherIcon').className = `fa-solid ${iconClass} text-lg`;
+                    renderTripWeatherForecast(data.daily);
                 } else {
                     throw new Error();
                 }
             } catch (err) {
-                document.getElementById('weatherTemp').innerText = `26°C / 15°C`;
-                document.getElementById('weatherDesc').innerText = `맑음 • 로컬 캐시 기준 표시`;
+                document.getElementById('weatherTemp').innerText = `현재 26°C`;
+                document.getElementById('weatherDesc').innerText = `맑음 • 캐시 기준 최고 26°C · 최저 15°C`;
+                renderOfflineTripWeatherForecast();
             }
         }
 
@@ -2090,7 +2170,7 @@
         }
 
         function openWeatherSource() {
-            window.open('https://open-meteo.com/en/docs?latitude=48.8566&longitude=2.3522&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Europe%2FParis&forecast_days=1', '_blank', 'noopener');
+            window.open('https://open-meteo.com/en/docs?latitude=48.8566&longitude=2.3522&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FParis&forecast_days=16', '_blank', 'noopener');
         }
 
         // 안심 오프라인 모드 토글 (현지 망 장애 대응 가상화)
@@ -2108,8 +2188,9 @@
                 showToast('로컬 오프라인 모드: 외부 API 전송 대기를 정지하고 보존된 오프라인 캐시 일정만 신속히 표출합니다.');
                 
                 document.getElementById('exchangeRateText').innerText = `1€ = 1,796원 (오프라인)`;
-                document.getElementById('weatherTemp').innerText = `26°C / 15°C`;
-                document.getElementById('weatherDesc').innerText = `맑음 • 오프라인 보존 모드`;
+                document.getElementById('weatherTemp').innerText = `현재 26°C`;
+                document.getElementById('weatherDesc').innerText = `맑음 • 오프라인 기준 최고 26°C · 최저 15°C`;
+                renderOfflineTripWeatherForecast();
                 document.getElementById('currentLocationText').innerText = "오프라인 모드 (위치 조회 불가)";
             } else {
                 btn.className = "flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 transition-all font-bold";
