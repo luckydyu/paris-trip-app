@@ -184,7 +184,9 @@
                         <h3 id="tripWeatherTitle" class="font-bold text-slate-800 text-sm">
                             <i class="fa-solid fa-calendar-days text-parisGold mr-1.5"></i>여행 기간 파리 예보
                         </h3>
-                        <span id="tripWeatherSourceLabel" class="text-[10px] text-slate-400 font-semibold">Open-Meteo · °C</span>
+                        <button onclick="openWeatherSource()" id="tripWeatherSourceLabel" class="text-[10px] text-slate-400 font-semibold hover:text-parisGold transition">
+                            상세 예보 보기
+                        </button>
                     </div>
                     <div id="tripWeatherForecast" class="divide-y divide-slate-100">
                         <div class="px-4 py-3 text-xs text-slate-500">여행 날짜별 날씨 예보 수신 중...</div>
@@ -913,6 +915,13 @@
             return { desc: '날씨 확인 중', iconClass: 'fa-cloud-sun text-parisGold' };
         }
 
+        function getFriendlyWeatherUrl(date = '') {
+            const compactDate = date.replace(/-/g, '');
+            return compactDate
+                ? `https://www.timeanddate.com/weather/france/paris/hourly?hd=${compactDate}`
+                : 'https://www.timeanddate.com/weather/france/paris/ext';
+        }
+
         function renderTripWeatherForecast(daily) {
             const forecastEl = document.getElementById('tripWeatherForecast');
             if (!forecastEl || !daily?.time?.length) return;
@@ -921,13 +930,13 @@
                 const index = daily.time.indexOf(day.date);
                 if (index === -1) {
                     return `
-                        <div class="px-4 py-3 flex items-center justify-between gap-3">
+                        <a href="${getFriendlyWeatherUrl(day.date)}" target="_blank" rel="noopener" class="px-4 py-3 flex items-center justify-between gap-3 hover:bg-amber-50/40 transition" aria-label="${day.label} 파리 상세 날씨 열기">
                             <div class="min-w-0">
                                 <p class="text-xs font-extrabold text-slate-800">${day.label} <span class="text-[10px] text-slate-400 font-semibold">${day.title}</span></p>
                                 <p class="text-[10px] text-slate-500 mt-0.5">예보 제공 범위 밖</p>
                             </div>
-                            <span class="text-[10px] text-slate-400 font-semibold whitespace-nowrap">대기 중</span>
-                        </div>
+                            <span class="text-[10px] text-parisGold font-semibold whitespace-nowrap">상세</span>
+                        </a>
                     `;
                 }
 
@@ -938,7 +947,7 @@
                 const rainLabel = Number.isFinite(rainChance) ? `강수 ${rainChance}%` : '강수 정보 없음';
 
                 return `
-                    <div class="px-4 py-3 flex items-center justify-between gap-3">
+                    <a href="${getFriendlyWeatherUrl(day.date)}" target="_blank" rel="noopener" class="px-4 py-3 flex items-center justify-between gap-3 hover:bg-amber-50/40 transition" aria-label="${day.label} 파리 상세 날씨 열기">
                         <div class="flex items-center gap-3 min-w-0">
                             <i class="fa-solid ${meta.iconClass} w-5 text-center"></i>
                             <div class="min-w-0">
@@ -950,7 +959,7 @@
                             <p class="text-xs font-extrabold text-slate-800">최고 ${maxTemp}°C</p>
                             <p class="text-[10px] font-semibold text-slate-500">최저 ${minTemp}°C</p>
                         </div>
-                    </div>
+                    </a>
                 `;
             }).join('');
 
@@ -962,13 +971,13 @@
             if (!forecastEl) return;
 
             forecastEl.innerHTML = tripWeatherDates.map(day => `
-                <div class="px-4 py-3 flex items-center justify-between gap-3">
+                <a href="${getFriendlyWeatherUrl(day.date)}" target="_blank" rel="noopener" class="px-4 py-3 flex items-center justify-between gap-3 hover:bg-amber-50/40 transition" aria-label="${day.label} 파리 상세 날씨 열기">
                     <div class="min-w-0">
                         <p class="text-xs font-extrabold text-slate-800">${day.label} <span class="text-[10px] text-slate-400 font-semibold">${day.title}</span></p>
                         <p class="text-[10px] text-slate-500 mt-0.5">온라인 연결 시 예보 갱신</p>
                     </div>
-                    <span class="text-[10px] text-slate-400 font-semibold whitespace-nowrap">오프라인</span>
-                </div>
+                    <span class="text-[10px] text-parisGold font-semibold whitespace-nowrap">상세</span>
+                </a>
             `).join('');
         }
 
@@ -2170,7 +2179,7 @@
         }
 
         function openWeatherSource() {
-            window.open('https://open-meteo.com/en/docs?latitude=48.8566&longitude=2.3522&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FParis&forecast_days=16', '_blank', 'noopener');
+            window.open(getFriendlyWeatherUrl(), '_blank', 'noopener');
         }
 
         // 안심 오프라인 모드 토글 (현지 망 장애 대응 가상화)
