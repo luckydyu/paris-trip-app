@@ -171,7 +171,7 @@
                             <i class="fa-solid fa-coins text-emerald-500 text-lg"></i>
                         </div>
                         <div class="mt-2">
-                            <h3 id="exchangeRateText" class="text-xl font-extrabold text-slate-800">로딩 중...</h3>
+                            <button onclick="openExchangeSource()" id="exchangeRateText" class="text-xl font-extrabold text-slate-800 text-left hover:text-emerald-600 transition">로딩 중...</button>
                             <div class="flex items-center gap-2 mt-1">
                                 <button onclick="switchTab('tools')" class="text-xs text-parisGold font-semibold block hover:underline text-left">
                                     계산기 <i class="fa-solid fa-chevron-right text-[10px]"></i>
@@ -210,14 +210,13 @@
                     </div>
                 </div>
 
-                <!-- 개인 문서함 링크 (민감 자료는 Google Drive 권한 공유로 관리) -->
+                <!-- 개인 문서함 링크 (민감 자료는 Google Drive에서 권한 관리) -->
                 <div class="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
                     <div class="flex justify-between items-start gap-3 mb-3">
                         <div>
                             <h3 class="font-bold text-slate-800"><i class="fa-brands fa-google-drive text-blue-500 mr-1.5"></i>개인 문서함</h3>
                             <p class="text-[10px] text-slate-500 mt-1">호텔 바우처, 티켓 원본, 예약 문서는 Drive 공유 폴더에서 확인합니다.</p>
                         </div>
-                        <span class="text-[10px] text-blue-600 font-bold bg-blue-50 border border-blue-100 px-2 py-1 rounded-full whitespace-nowrap">권한 공유</span>
                     </div>
                     <a href="https://drive.google.com/drive/folders/1NHYBvJrWM3MtPQsD1El8m39CAVow1I6i?usp=sharing" target="_blank" rel="noopener" class="flex items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50/70 px-3 py-3 text-left hover:bg-blue-100/70 transition" aria-label="Google Drive 개인 문서함 열기">
                         <div class="min-w-0">
@@ -593,6 +592,26 @@
             </div>
         </div>
 
+        <div id="exchangeSourceModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100">
+                <div class="bg-emerald-600 text-white p-4 flex justify-between items-center">
+                    <h3 class="font-bold text-sm flex items-center"><i class="fa-solid fa-coins mr-2"></i>환율 정보 출처</h3>
+                    <button onclick="closeExchangeSourceModal()" class="text-emerald-100 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div class="p-5 space-y-3 text-xs text-slate-600">
+                    <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-3">
+                        <p id="exchangeModalRate" class="text-lg font-extrabold text-slate-900">1€ = --원</p>
+                        <p id="exchangeModalSource" class="text-[11px] text-emerald-700 font-bold mt-1">출처 확인 중</p>
+                    </div>
+                    <p class="leading-relaxed">앱은 Frankfurter를 우선 조회하고, 연결이 어려우면 미러 또는 대체 공개 환율 API를 사용합니다. 표시값은 결제 시 카드사·환전 수수료와 다를 수 있습니다.</p>
+                </div>
+                <div class="p-3 bg-slate-50 border-t border-slate-100 flex gap-2">
+                    <button onclick="closeExchangeSourceModal()" class="flex-1 bg-white border border-slate-200 py-2 rounded-lg text-xs font-semibold text-slate-600">닫기</button>
+                    <button onclick="openExchangeSourceWebsite()" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-bold text-xs">출처 사이트 열기</button>
+                </div>
+            </div>
+        </div>
+
         <!-- 실시간 공유 및 동기화 설정 전용 팝업 (완벽 분리) -->
         <div id="syncSettingsModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl border border-slate-100">
@@ -930,6 +949,8 @@
         const customLinksStorageKey = 'parisTripCustomLinks';
         let exchangeRateSourceUrl = 'https://www.frankfurter.app/';
         let exchangeRateSourceName = 'Frankfurter';
+        let exchangeRateSourceDate = '';
+        let exchangeRateDisplayValue = '';
 
         const linkCategoryMeta = {
             docs: { label: '문서', icon: 'fa-folder-open', color: 'text-blue-500' },
@@ -1009,8 +1030,24 @@
                 : 'https://www.timeanddate.com/weather/france/paris/ext';
         }
 
-        function openExchangeSource() {
+        function openExchangeSourceWebsite() {
             window.open(exchangeRateSourceUrl, '_blank', 'noopener');
+        }
+
+        function openExchangeSource() {
+            const modal = document.getElementById('exchangeSourceModal');
+            const rateEl = document.getElementById('exchangeModalRate');
+            const sourceEl = document.getElementById('exchangeModalSource');
+            if (rateEl) rateEl.innerText = exchangeRateDisplayValue || `1€ = ${Math.round(rate).toLocaleString()}원`;
+            if (sourceEl) {
+                const dateLabel = exchangeRateSourceDate ? ` · 기준일 ${exchangeRateSourceDate}` : '';
+                sourceEl.innerText = `${exchangeRateSourceName}${dateLabel}`;
+            }
+            modal?.classList.remove('hidden');
+        }
+
+        function closeExchangeSourceModal() {
+            document.getElementById('exchangeSourceModal')?.classList.add('hidden');
         }
 
         function escapeHtml(value) {
@@ -2070,14 +2107,18 @@
                 rate = liveRate;
                 exchangeRateSourceUrl = liveSource?.sourceUrl || exchangeRateSourceUrl;
                 exchangeRateSourceName = liveSource?.name || exchangeRateSourceName;
-                const dateLabel = liveDate ? ` · ${String(liveDate).slice(0, 10)}` : '';
-                document.getElementById('exchangeRateText').innerText = `1€ = ${Math.round(rate).toLocaleString()}원`;
+                exchangeRateSourceDate = liveDate ? String(liveDate).slice(0, 10) : '';
+                exchangeRateDisplayValue = `1€ = ${Math.round(rate).toLocaleString()}원`;
+                const dateLabel = exchangeRateSourceDate ? ` · ${exchangeRateSourceDate}` : '';
+                document.getElementById('exchangeRateText').innerText = exchangeRateDisplayValue;
                 document.getElementById('rateLabel').innerText = `${exchangeRateSourceName}${dateLabel}: 1€ = ${rate.toFixed(1)}원`;
             } catch (err) {
                 rate = 1796.0;
                 exchangeRateSourceUrl = 'https://www.frankfurter.app/';
                 exchangeRateSourceName = '기준값';
-                document.getElementById('exchangeRateText').innerText = `1€ = ${Math.round(rate).toLocaleString()}원`;
+                exchangeRateSourceDate = '';
+                exchangeRateDisplayValue = `1€ = ${Math.round(rate).toLocaleString()}원`;
+                document.getElementById('exchangeRateText').innerText = exchangeRateDisplayValue;
                 document.getElementById('rateLabel').innerText = `환율 서버 점검 (여행용 기준값 적용)`;
             }
 
@@ -2500,7 +2541,9 @@
                 
                 exchangeRateSourceUrl = 'https://www.frankfurter.app/';
                 exchangeRateSourceName = '오프라인 기준값';
-                document.getElementById('exchangeRateText').innerText = `1€ = 1,796원 (오프라인)`;
+                exchangeRateSourceDate = '';
+                exchangeRateDisplayValue = `1€ = 1,796원 (오프라인)`;
+                document.getElementById('exchangeRateText').innerText = exchangeRateDisplayValue;
                 document.getElementById('rateLabel').innerText = `오프라인 기준값: 1€ = 1,796원`;
                 document.getElementById('weatherTemp').innerText = `현재 26°C`;
                 document.getElementById('weatherDesc').innerText = `맑음 • 오프라인 기준 최고 26°C · 최저 15°C`;
@@ -2526,6 +2569,9 @@
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.openWeatherSource = openWeatherSource;
+        window.openExchangeSource = openExchangeSource;
+        window.closeExchangeSourceModal = closeExchangeSourceModal;
+        window.openExchangeSourceWebsite = openExchangeSourceWebsite;
         window.setLinkCategory = setLinkCategory;
         window.renderLinkHub = renderLinkHub;
         window.openCustomLinkModal = openCustomLinkModal;
